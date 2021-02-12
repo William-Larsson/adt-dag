@@ -15,7 +15,11 @@ public class Dag<T> {
     }
 
     public void addEdge(Vertex<T> a, Vertex<T> b, T w) {
-
+        if (!edges.containsKey(a)) {
+            List<Vertex<T>> edgeList = new ArrayList<>();
+            edges.put(a, edgeList);
+        }
+        edges.get(a).add(b);
     }
 
     public List<Vertex<T>> topologicalOrdering() {
@@ -23,7 +27,7 @@ public class Dag<T> {
         return new ArrayList<>();
     }
 
-    public T weightOfLongestPath(Vertex<T> a, Vertex<T> b, Weights<T> f, Weights<T> g) {
+    public T weightOfLongestPath(Vertex<T> a, Vertex<T> b, Weights<T> weightF) {
         return null;
     }
 
