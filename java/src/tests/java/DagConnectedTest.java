@@ -86,7 +86,7 @@ public class DagConnectedTest {
         dag.addEdge(b, c, 3);
         dag.addEdge(a, c, 10);
 
-        Integer pathWeight = dag.weightOfLongestPath(a, c, new WeightMethods<Integer>() {
+        Integer pathWeight = dag.weightOfLongestPath(a, c, new WeightMethods<>() {
             @Override
             public Integer getVertexWeight(Vertex<Integer> vertex) {
                 return vertex.getWeight();
@@ -111,14 +111,6 @@ public class DagConnectedTest {
             public WeightComparison compare(Integer a, Integer b) {
                 if (a < b) return WeightComparison.LESS_THAN;
                 if (a > b) return WeightComparison.GREATER_THAN;
-
-                return WeightComparison.EQUAL;
-            }
-
-            @Override
-            public WeightComparison compare(Edge<Integer> a, Edge<Integer> b) {
-                if (a.getWeight() < b.getWeight()) return WeightComparison.LESS_THAN;
-                if (a.getWeight() > b.getWeight()) return WeightComparison.GREATER_THAN;
 
                 return WeightComparison.EQUAL;
             }

@@ -1,13 +1,12 @@
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class Dag<T> {
 
-    private List<Vertex<T>> vertices = new ArrayList<>();
+    private final List<Vertex<T>> vertices = new ArrayList<>();
 
     // Maps a vertex to a list of all edges that exist from that vertex.
-    private Map<Vertex<T>, List<Edge<T>>> edgeMap = new HashMap<>();
-    private List<Edge<T>> allEdges = new ArrayList<>();
+    private final Map<Vertex<T>, List<Edge<T>>> edgeMap = new HashMap<>();
+    private final List<Edge<T>> allEdges = new ArrayList<>();
 
     public Dag() {}
 
@@ -43,15 +42,15 @@ public class Dag<T> {
             List<Edge<T>> edgeList = new ArrayList<>();
             edgeMap.put(a, edgeList);
         }
-        Edge<T> e = new Edge<T>(a, b, w);
+        Edge<T> e = new Edge<>(a, b, w);
         allEdges.add(e);
         edgeMap.get(a).add(e);
     }
 
     /**
      * Removes the edge from Vertex a to Vertex b, if such an edge exists.
-     * @param a
-     * @param b
+     * @param a From
+     * @param b To
      */
     public void removeEdge(Vertex<T> a, Vertex<T> b) {
         List<Edge<T>> edges = edgeMap.get(a);
@@ -59,7 +58,7 @@ public class Dag<T> {
         allEdges.removeIf(e -> e.getFrom() == a && e.getTo() == b);
     }
 
-    public boolean hasIncomingEdge(Vertex<T> a) {
+    public boolean noIncomingEdge(Vertex<T> a) {
         boolean hasIncoming = false;
         for (Edge<T> e : allEdges) {
             if (a == e.getTo()) {
@@ -68,7 +67,7 @@ public class Dag<T> {
             }
         }
 
-        return hasIncoming;
+        return !hasIncoming;
     }
 
     /**
@@ -82,7 +81,7 @@ public class Dag<T> {
 
         // Find all vertices with no incoming edges.
         for (Vertex<T> vert : vertices) {
-            if (!hasIncomingEdge(vert)) {
+            if (noIncomingEdge(vert)) {
                 noIncomingEdge.add(vert);
             }
         }
@@ -98,7 +97,7 @@ public class Dag<T> {
                     Edge<T> edge = iterator.next();
                     iterator.remove();
 
-                    if (!graph.hasIncomingEdge(edge.getTo())) {
+                    if (graph.noIncomingEdge(edge.getTo())) {
                         noIncomingEdge.add(edge.getTo());
                     }
                 }
@@ -114,9 +113,9 @@ public class Dag<T> {
 
     /**
      * Traverses the graph and creates a list of paths between the given vertices.
-     * @param a
-     * @param b
-     * @return
+     * @param a Starting vertex
+     * @param b Goal vertex
+     * @return The path between a and b.
      */
     public List<List<Vertex<T>>> getAllPaths(Vertex<T> a, Vertex<T> b) {
         List<List<Vertex<T>>> allPaths = new LinkedList<>();
@@ -167,11 +166,11 @@ public class Dag<T> {
             T weight = weightMethods.getZeroWeight();
             for (int i = 0; i < path.size(); i++) {
                 Vertex<T> v = path.get(i);
-                weight = weightMethods.addWeights(weight, v.getWeight());
+                weight = weightMethods.addWeights(weight, weightMethods.getVertexWeight(v));
                 // Find weight from current node to next node.
                 if (i < path.size() - 1) {
                     Edge<T> edge = findEdge(v, path.get(i+1));
-                    weight = weightMethods.addWeights(weight, edge.getWeight());
+                    weight = weightMethods.addWeights(weight, weightMethods.getEdgeWeight(edge));
                 }
             }
 
@@ -186,8 +185,8 @@ public class Dag<T> {
 
     /**
      * Checks if the two vertices are connected or not, uses BFS
-     * @param a
-     * @param b
+     * @param a From vertex
+     * @param b To vertex
      * @return True if the vertices are connected; false otherwise.
      */
     public boolean connected(Vertex<T> a, Vertex<T> b) {

@@ -1,5 +1,3 @@
-import java.util.List;
-
 public interface WeightMethods<T> {
 
     T getVertexWeight(Vertex<T> vertex);
@@ -21,18 +19,11 @@ public interface WeightMethods<T> {
     T getZeroWeight();
 
     /**
-     * Compares the weights of the given vertices.
-     * @param a
-     * @param b
-     * @return
+     * Compares the given weights, and returns information about their relative
+     * sizes.
+     * @param a First weight
+     * @param b Second weight
+     * @return Enum representing the comparison results.
      */
     WeightComparison compare(T a, T b);
-
-    /**
-     * Compares the weights of the given edges.
-     * @param a
-     * @param b
-     * @return
-     */
-    WeightComparison compare(Edge<T> a, Edge<T> b);
 }
