@@ -2,8 +2,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DagConnectedTest {
 
@@ -45,8 +44,32 @@ public class DagConnectedTest {
         dag.addEdge(b, d, 0);
 
         List<Vertex<Integer>> sorted = dag.topologicalOrdering();
-        for (Vertex<Integer> vert : sorted) {
-            System.out.println(vert.getWeight());
+        for (int i = 0; i < sorted.size(); i++)
+            assertEquals(i+1, sorted.get(i).getWeight());
+    }
+
+    @Test
+    public void topologicalOrderingWithLargeGraph() {
+        Dag<Integer> dag = new Dag<>();
+        Vertex<Integer> a = dag.addVertex(1);
+        Vertex<Integer> b = dag.addVertex(2);
+        Vertex<Integer> c = dag.addVertex(3);
+        Vertex<Integer> d = dag.addVertex(4);
+        Vertex<Integer> e = dag.addVertex(5);
+        Vertex<Integer> f = dag.addVertex(6);
+        Vertex<Integer> g = dag.addVertex(7);
+
+        dag.addEdge(a, b,0);
+        dag.addEdge(b, e,0);
+        dag.addEdge(b, c,0);
+        dag.addEdge(b, d,0);
+        dag.addEdge(e, f,0);
+        dag.addEdge(f, g,0);
+
+        int[] correct = {1,2,5,3,4,6,7};
+        List<Vertex<Integer>> sorted = dag.topologicalOrdering();
+        for (int i = 0; i < correct.length; i++) {
+            assertEquals(correct[i], sorted.get(i).getWeight());
         }
     }
 }
