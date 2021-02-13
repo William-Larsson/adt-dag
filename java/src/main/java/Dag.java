@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class Dag<T> {
@@ -111,8 +112,76 @@ public class Dag<T> {
         }
     }
 
+    /**
+     * Traverses the graph and creates a list of paths between the given vertices.
+     * @param a
+     * @param b
+     * @return
+     */
+    public List<List<Vertex<T>>> getAllPaths(Vertex<T> a, Vertex<T> b) {
+        List<List<Vertex<T>>> allPaths = new LinkedList<>();
+
+        Queue<List<Vertex<T>>> queue = new LinkedList<>();
+        List<Vertex<T>> firstPath = new LinkedList<>();
+        firstPath.add(a);
+
+        queue.add(firstPath);
+
+        while (queue.size() > 0) {
+            List<Vertex<T>> path = queue.poll();
+            Vertex<T> next = path.get(path.size()-1);
+            if (next == b) {
+                // This is the end of a path.
+                allPaths.add(path);
+            }
+
+            // Find all nodes we can reach from `next`.
+            List<Edge<T>> edges = edgeMap.get(next);
+            if (edges != null) {
+                for (Edge<T> edge : edges) {
+                    List<Vertex<T>> newPath = new LinkedList<>(List.copyOf(path));
+                    newPath.add(edge.getTo());
+                    queue.add(newPath);
+                }
+            }
+        }
+        return allPaths;
+    }
+
+    /**
+     * Computes the weight of the longest path between the vertices a and b.
+     * @param a Path start
+     * @param b Path end
+     * @param weightMethods Provides methods for interpreting the weights of
+     *                      the vertices and edges.
+     * @return the weight of the longest path between a and b.
+     */
     public T weightOfLongestPath(Vertex<T> a, Vertex<T> b, WeightMethods<T> weightMethods) {
-        return null;
+        // TODO: This method needs more testing.
+        //       Also, is it general enough?
+        List<List<Vertex<T>>> allPaths = getAllPaths(a, b);
+
+        // Find the longest path.
+        T largestWeight = weightMethods.getZeroWeight();
+        for (List<Vertex<T>> path : allPaths) {
+            T weight = weightMethods.getZeroWeight();
+            for (int i = 0; i < path.size(); i++) {
+                Vertex<T> v = path.get(i);
+                weight = weightMethods.addWeights(weight, v.getWeight());
+                // Find weight from current node to next node.
+                if (i < path.size() - 1) {
+                    Edge<T> edge = findEdge(v, path.get(i+1));
+                    weight = weightMethods.addWeights(weight, edge.getWeight());
+                }
+            }
+
+            // If weight > largestWeight, we have found a new maximum.
+            if (weightMethods.compare(weight, largestWeight) == WeightComparison.GREATER_THAN) {
+                largestWeight = weight;
+            }
+        }
+
+        return largestWeight;
     }
 
     /**
@@ -143,6 +212,25 @@ public class Dag<T> {
         }
 
         return false;
+    }
+
+    /**
+     * Finds the edge that connects the vertices a and b.
+     * @param a Edge from
+     * @param b Edge to
+     * @return an edge connecting a and b, or null if such an edge does not exist.
+     */
+    public Edge<T> findEdge(Vertex<T> a, Vertex<T> b) {
+        List<Edge<T>> edges = edgeMap.get(a);
+        if (edges == null || edges.size() == 0) return null;
+
+        for (Edge<T> e : edges) {
+            if (e.getTo() == b) {
+                return e;
+            }
+        }
+
+        return null;
     }
 
 }
