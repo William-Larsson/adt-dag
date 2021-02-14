@@ -1,6 +1,12 @@
 import java.util.*;
+import java.util.function.Function;
 
-public class Dag<T> {
+/**
+ * A general directed acyclic data (DAG) data structure. This data structure
+ * is parameterized and can take any type that implements the Weight interface.
+ * @param <T> The type of the weights.
+ */
+public class Dag<T extends Weight<T>> {
 
     private final List<Vertex<T>> vertices = new ArrayList<>();
 
@@ -151,31 +157,35 @@ public class Dag<T> {
      * Computes the weight of the longest path between the vertices a and b.
      * @param a Path start
      * @param b Path end
-     * @param weightMethods Provides methods for interpreting the weights of
-     *                      the vertices and edges.
+     * @param f function for interpreting the weight of the vertices
+     * @param g function for interpreting the weight of the edges.
      * @return the weight of the longest path between a and b.
      */
-    public T weightOfLongestPath(Vertex<T> a, Vertex<T> b, WeightMethods<T> weightMethods) {
+    public T weightOfLongestPath(Vertex<T> a, Vertex<T> b, Function<T,T> f, Function<T, T> g) {
         // TODO: This method needs more testing.
         //       Also, is it general enough?
         List<List<Vertex<T>>> allPaths = getAllPaths(a, b);
 
         // Find the longest path.
-        T largestWeight = weightMethods.getZeroWeight();
+        T largestWeight = null;
         for (List<Vertex<T>> path : allPaths) {
-            T weight = weightMethods.getZeroWeight();
-            for (int i = 0; i < path.size(); i++) {
+
+            T weight = f.apply(path.get(0).getWeight());
+            weight = weight.add(g.apply(findEdge(path.get(0), path.get(1)).getWeight()));
+
+            for (int i = 1; i < path.size(); i++) {
                 Vertex<T> v = path.get(i);
-                weight = weightMethods.addWeights(weight, weightMethods.getVertexWeight(v));
+                weight = weight.add(f.apply(v.getWeight()));
                 // Find weight from current node to next node.
                 if (i < path.size() - 1) {
                     Edge<T> edge = findEdge(v, path.get(i+1));
-                    weight = weightMethods.addWeights(weight, weightMethods.getEdgeWeight(edge));
+                    weight = weight.add(g.apply(edge.getWeight()));
                 }
             }
 
             // If weight > largestWeight, we have found a new maximum.
-            if (weightMethods.compare(weight, largestWeight) == WeightComparison.GREATER_THAN) {
+            if (largestWeight == null || weight.compare(largestWeight) ==
+                                         WeightComparison.GREATER_THAN) {
                 largestWeight = weight;
             }
         }

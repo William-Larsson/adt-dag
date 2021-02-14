@@ -1,7 +1,7 @@
 public interface WeightMethods<T> {
 
-    T getVertexWeight(Vertex<T> vertex);
-    T getEdgeWeight(Edge<T> edge);
+    T getVertexWeight(T w);
+    T getEdgeWeight(T w);
 
     /**
      * Sums the given weights and returns the sum.
