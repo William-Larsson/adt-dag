@@ -90,4 +90,43 @@ public class DagConnectedTest {
 
         assertEquals(14, pathWeight.getIntWeight());
     }
+
+    @Test
+    public void longestPathLargeTest() {
+        Dag<IntWeight> dag = new Dag<>();
+
+        Vertex<IntWeight> a = dag.addVertex(new IntWeight(1));
+        Vertex<IntWeight> b = dag.addVertex(new IntWeight(2));
+        Vertex<IntWeight> c = dag.addVertex(new IntWeight(2));
+        Vertex<IntWeight> d = dag.addVertex(new IntWeight(6));
+        Vertex<IntWeight> e = dag.addVertex(new IntWeight(5));
+        Vertex<IntWeight> f = dag.addVertex(new IntWeight(15));
+        Vertex<IntWeight> g = dag.addVertex(new IntWeight(20));
+        Vertex<IntWeight> h = dag.addVertex(new IntWeight(25));
+
+        dag.addEdge(a, b, new IntWeight(1));
+        dag.addEdge(a, d, new IntWeight(2));
+        dag.addEdge(b, c, new IntWeight(2));
+        dag.addEdge(b, d, new IntWeight(5));
+        dag.addEdge(b, e, new IntWeight(6));
+        dag.addEdge(c, e, new IntWeight(3));
+        dag.addEdge(c, h, new IntWeight(2));
+        dag.addEdge(d, e, new IntWeight(7));
+        dag.addEdge(e, f, new IntWeight(8));
+        dag.addEdge(e, g, new IntWeight(4));
+
+//      These are all the paths from a to g
+//        a -> d -> e -> g (weight 1 + 2 + 6 + 7 + 5 + 4 + 20 = 45)
+//        a -> b -> d -> e -> g (weight 1 + 1 + 2 + 5 + 6 + 7 + 5 + 4 + 20 = 51)
+//        a -> b -> e -> g (weight 1 + 1 + 2 + 6 + 5 + 4 + 20 = 39)
+//        a -> b -> c -> e -> g (weight 1 + 1 + 2 + 1 + 2 + 3 + 5 + 4 + 20 = 39)
+
+        List<List<Vertex<IntWeight>>> paths = dag.getAllPaths(a, g);
+        IntWeight longPath = dag.weightOfLongestPath(a, g, (i) -> i, (i) -> i);
+
+        IntWeight shortPath = dag.weightOfPathComp(a, g, i -> i, i -> i, WeightComparison.LESS_THAN);
+
+        assertEquals(51, longPath.getIntWeight());
+        assertEquals(39, shortPath.getIntWeight());
+    }
 }

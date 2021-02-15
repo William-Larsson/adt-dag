@@ -44,6 +44,7 @@ public class Dag<T extends Weight<T>> {
             // TODO: Create a custom checked exception for this.
             throw new NullPointerException("Cannot add edge - would result in cycle!");
         }
+
         if (!edgeMap.containsKey(a)) {
             List<Edge<T>> edgeList = new ArrayList<>();
             edgeMap.put(a, edgeList);
@@ -83,17 +84,17 @@ public class Dag<T extends Weight<T>> {
     public List<Vertex<T>> topologicalOrdering() {
         Dag<T> graph = new Dag<>(this);
         List<Vertex<T>> sortedList = new ArrayList<>();
-        List<Vertex<T>> noIncomingEdge = new ArrayList<>();
+        List<Vertex<T>> noIncomingEdgeList = new ArrayList<>();
 
         // Find all vertices with no incoming edges.
         for (Vertex<T> vert : vertices) {
             if (noIncomingEdge(vert)) {
-                noIncomingEdge.add(vert);
+                noIncomingEdgeList.add(vert);
             }
         }
 
-        while (!noIncomingEdge.isEmpty()) {
-            Vertex<T> node = noIncomingEdge.remove(0);
+        while (!noIncomingEdgeList.isEmpty()) {
+            Vertex<T> node = noIncomingEdgeList.remove(0);
             sortedList.add(node);
 
             List<Edge<T>> edges = graph.edgeMap.get(node);
@@ -104,7 +105,7 @@ public class Dag<T extends Weight<T>> {
                     iterator.remove();
 
                     if (graph.noIncomingEdge(edge.getTo())) {
-                        noIncomingEdge.add(edge.getTo());
+                        noIncomingEdgeList.add(edge.getTo());
                     }
                 }
             }
@@ -162,12 +163,26 @@ public class Dag<T extends Weight<T>> {
      * @return the weight of the longest path between a and b.
      */
     public T weightOfLongestPath(Vertex<T> a, Vertex<T> b, Function<T,T> f, Function<T, T> g) {
+        return weightOfPathComp(a, b, f, g, WeightComparison.GREATER_THAN);
+    }
+
+    /**
+     * Computes the weights of the path between vertices a and b, a custom
+     * comparison operator is used to determine how the new weight is chosen
+     * LESS_THAN yields the shortest path, GREATER_THAN yields the longest path.
+     * @param a Path start
+     * @param b Path end
+     * @param f function for interpreting the weight of the vertices
+     * @param g function for interpreting the weight of the edges.
+     * @return the weight of the path between a and b, using some comparison.
+     */
+    public T weightOfPathComp(Vertex<T> a, Vertex<T> b, Function<T,T> f, Function<T, T> g, WeightComparison comp) {
         // TODO: This method needs more testing.
         //       Also, is it general enough?
         List<List<Vertex<T>>> allPaths = getAllPaths(a, b);
 
         // Find the longest path.
-        T largestWeight = null;
+        T currWeight = null;
         for (List<Vertex<T>> path : allPaths) {
 
             T weight = f.apply(path.get(0).getWeight());
@@ -183,14 +198,13 @@ public class Dag<T extends Weight<T>> {
                 }
             }
 
-            // If weight > largestWeight, we have found a new maximum.
-            if (largestWeight == null || weight.compare(largestWeight) ==
-                                         WeightComparison.GREATER_THAN) {
-                largestWeight = weight;
+            // If weight `comp` largestWeight, we have found a new weight.
+            if (currWeight == null || weight.compare(currWeight) == comp) {
+                currWeight = weight;
             }
         }
 
-        return largestWeight;
+        return currWeight;
     }
 
     /**
