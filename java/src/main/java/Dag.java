@@ -1,3 +1,5 @@
+import exceptions.CyclicGraphException;
+
 import java.util.*;
 import java.util.function.Function;
 
@@ -41,8 +43,7 @@ public class Dag<T extends Weight<T>> {
      */
     public void addEdge(Vertex<T> a, Vertex<T> b, T w) {
         if (connected(b, a)) {
-            // TODO: Create a custom checked exception for this.
-            throw new NullPointerException("Cannot add edge - would result in cycle!");
+            throw new CyclicGraphException();
         }
 
         if (!edgeMap.containsKey(a)) {
@@ -181,7 +182,6 @@ public class Dag<T extends Weight<T>> {
         //       Also, is it general enough?
         List<List<Vertex<T>>> allPaths = getAllPaths(a, b);
 
-        // Find the longest path.
         T currWeight = null;
         for (List<Vertex<T>> path : allPaths) {
 

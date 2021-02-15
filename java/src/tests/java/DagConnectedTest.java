@@ -1,3 +1,4 @@
+import exceptions.CyclicGraphException;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -129,4 +130,26 @@ public class DagConnectedTest {
         assertEquals(51, longPath.getIntWeight());
         assertEquals(39, shortPath.getIntWeight());
     }
+
+
+    @Test
+    public void cyclicGraphThrowsException() {
+        Dag<IntWeight> dag = new Dag<>();
+
+        Vertex<IntWeight> a = dag.addVertex(new IntWeight(1));
+        Vertex<IntWeight> b = dag.addVertex(new IntWeight(2));
+        Vertex<IntWeight> c = dag.addVertex(new IntWeight(2));
+        Vertex<IntWeight> d = dag.addVertex(new IntWeight(6));
+
+        dag.addEdge(a, b, new IntWeight(1));
+        dag.addEdge(a, d, new IntWeight(2));
+        dag.addEdge(b, c, new IntWeight(2));
+        dag.addEdge(b, d, new IntWeight(5));
+
+        assertThrows(CyclicGraphException.class,
+                () ->  dag.addEdge(d, a, new IntWeight(2)));
+
+    }
 }
+
+
