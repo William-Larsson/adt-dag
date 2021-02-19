@@ -11,6 +11,10 @@ public class StrWeight implements Weight<StrWeight> {
         return new StrWeight(weight.concat(w.weight));
     }
 
+    public String getWeight() {
+        return weight;
+    }
+
     /**
      * Comparison is defined alphabetical order. a < b < c ...
      * aa < ab < ac

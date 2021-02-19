@@ -165,8 +165,10 @@ public class DagConnectedTest {
         dag.addEdge(a, ca, new StrWeight(""));
 
         StrWeight w = dag.weightOfPathComp(a, ca, i -> i, i -> i, WeightComparison.LESS_THAN);
+        StrWeight longest = dag.weightOfLongestPath(a, ca, i -> i, i -> i);
 
-        System.out.println("Weight: " + w);
+        assertEquals("aca", w.getWeight());
+        assertEquals("abbca", longest.getWeight());
     }
 }
 
