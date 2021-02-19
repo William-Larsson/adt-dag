@@ -14,6 +14,7 @@ public class Dag<T extends Weight<T>> {
 
     // Maps a vertex to a list of all edges that exist from that vertex.
     private final Map<Vertex<T>, List<Edge<T>>> edgeMap = new HashMap<>();
+
     private final List<Edge<T>> allEdges = new ArrayList<>();
 
     public Dag() {}
@@ -50,6 +51,7 @@ public class Dag<T extends Weight<T>> {
             List<Edge<T>> edgeList = new ArrayList<>();
             edgeMap.put(a, edgeList);
         }
+
         Edge<T> e = new Edge<>(a, b, w);
         allEdges.add(e);
         edgeMap.get(a).add(e);

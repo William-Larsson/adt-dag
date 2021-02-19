@@ -150,6 +150,24 @@ public class DagConnectedTest {
                 () ->  dag.addEdge(d, a, new IntWeight(2)));
 
     }
+
+    @Test
+    public void strWeightShortestPath() {
+        Dag<StrWeight> dag = new Dag<>();
+
+        Vertex<StrWeight> a = dag.addVertex(new StrWeight("a"));
+        Vertex<StrWeight> bb = dag.addVertex(new StrWeight("bb"));
+        Vertex<StrWeight> ca = dag.addVertex(new StrWeight("ca"));
+
+        dag.addEdge(a, bb, new StrWeight(""));
+        dag.addEdge(bb, ca, new StrWeight(""));
+
+        dag.addEdge(a, ca, new StrWeight(""));
+
+        StrWeight w = dag.weightOfPathComp(a, ca, i -> i, i -> i, WeightComparison.LESS_THAN);
+
+        System.out.println("Weight: " + w);
+    }
 }
 
 
