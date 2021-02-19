@@ -152,7 +152,7 @@ public class DagConnectedTest {
     }
 
     @Test
-    public void strWeightShortestPath() {
+    public void strWeightPathTest() {
         Dag<StrWeight> dag = new Dag<>();
 
         Vertex<StrWeight> a = dag.addVertex(new StrWeight("a"));
@@ -166,9 +166,11 @@ public class DagConnectedTest {
 
         StrWeight w = dag.weightOfPathComp(a, ca, i -> i, i -> i, WeightComparison.LESS_THAN);
         StrWeight longest = dag.weightOfLongestPath(a, ca, i -> i, i -> i);
+        StrWeight lPipe = dag.weightOfLongestPath(a, ca, i -> i, i -> new StrWeight("|"));
 
         assertEquals("aca", w.getWeight());
         assertEquals("abbca", longest.getWeight());
+        assertEquals("a|bb|ca", lPipe.getWeight());
     }
 }
 
