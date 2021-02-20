@@ -13,10 +13,43 @@ module DAG (
     import qualified Graph as G
     import Data.List ( delete ) 
     import Data.Maybe ( isJust )
+    import Data.Char ( ord, chr )
+
+
+    -- Type class: AddWeights
+    --
+    -- Interface for defining addition operation of
+    -- Vertex and Edge weights. 
+    class AddWeights w where 
+        add :: w -> w -> w 
+    
+    -- AddWeights instances
+    --
+    -- TODO: Start by making sure that regular numbers work!!!
+    instance AddWeights Integer where
+        add w1 w2 = w1 + w2
+    instance AddWeights Float where
+        add w1 w2 = w1 + w2
+    instance AddWeights Double where
+        add w1 w2 = w1 + w2
+
+    -- TODO: These should work too? 
+    --instance AddWeights Bool where
+    --   add w1 w2 = w1 < w2
+    --instance AddWeights String where
+    --    add w1 w2 = w1 ++ w2
+    --
+    --
+    -- TODO: Can I do this? This might be solution to avoid 
+    -- "Use TypeSynonymInstances" needed for String..
+    -- maxBound :: Char  == 1114111 so that is a limiting factor.
+    -- instance AddWeights Char where
+    --     add w1 w2 = chr $ ord w1 + ord w2
+
 
     
     -- Function: addEdge
-    -- 
+    --
     -- Adds edge to graph if no cycle is introduced and 
     -- the start of the edge exist as a vertex in graph. 
     addEdge :: Eq w => G.Graph w -> G.Edge w -> G.Graph w
@@ -95,28 +128,7 @@ module DAG (
 
 
 
-    -- TODO: Do I need a function "add" that for example could add numbers and chars?
-    -- READ THIS: https://andrew.gibiansky.com/blog/haskell/haskell-abstractions/
-    --            Monoids of instance Num/Char could perhaps be the answer?
-    -- Something like this:    (?)
-
-    class Monoid m where
-        mempty :: m -- TODO: is this one needed?
-        mappend :: m -> m -> m
-
-    newtype Sum s = Sum s
-    instance Num s => DAG.Monoid (Sum s) where
-        mempty = Sum 0
-        mappend (Sum x) (Sum y) = Sum $ x + y
-
-
-
-    ---------------------------
-    ---------------------------
-
-
-
-    -- TODO: Wait with this until I figure out the Monoid and newtype things above ☝
+    -- TODO: Wait with this until I figure out the class/instance things above ☝
     weightOfLongestPath :: 
         Eq w => G.Graph w -> 
         G.VertexID -> G.VertexID -> 
