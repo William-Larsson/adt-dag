@@ -1,4 +1,5 @@
 import exceptions.CyclicGraphException;
+import jdk.jfr.StackTrace;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -171,6 +172,27 @@ public class DagConnectedTest {
         assertEquals("aca", w.getWeight());
         assertEquals("abbca", longest.getWeight());
         assertEquals("a|bb|ca", lPipe.getWeight());
+    }
+
+    @Test
+    public void copyConstructorTest() {
+        Dag<IntWeight> dag = new Dag<>();
+
+        Vertex<IntWeight> a = dag.addVertex(new IntWeight(1));
+        Vertex<IntWeight> b = dag.addVertex(new IntWeight(2));
+        Vertex<IntWeight> c = dag.addVertex(new IntWeight(2));
+        Vertex<IntWeight> d = dag.addVertex(new IntWeight(6));
+
+        dag.addEdge(a, b, new IntWeight(1));
+        dag.addEdge(a, d, new IntWeight(2));
+        dag.addEdge(b, c, new IntWeight(2));
+        dag.addEdge(b, d, new IntWeight(5));
+
+        Dag<IntWeight> copy = new Dag<>(dag);
+        copy.reduceInCount(d);
+        copy.reduceInCount(d);
+
+        assertNotEquals(copy.getInCount(d), dag.getInCount(d));
     }
 }
 
