@@ -1,3 +1,8 @@
+-- Module: Graph 
+--
+-- A general graph data structure. 
+-- This data structure is parameterized and can take any 
+-- type as its vertex and edge weight. 
 module Graph (
     VertexID, 
     Vertex,
@@ -13,20 +18,17 @@ module Graph (
     type Vertex w = (VertexID, w) 
     type Edge w   = (VertexID, VertexID, w) -- start, end, w
 
-
     -- Graph data structure.
     data Graph w = Graph {
         vertices :: [Vertex w],
         edges :: [Edge w]
-    } deriving (Show, Read) -- also Eq and Ord? 
-
+    } deriving (Show, Read, Eq, Ord)
 
     -- Function: initGraph
     --
     -- Creates empty Graph. 
     initGraph :: Graph w 
     initGraph = Graph [] []
-
 
     -- Function: addVertex
     --
@@ -36,7 +38,6 @@ module Graph (
         where 
             id = fromIntegral (length vs + 1)
             vx = (id, w)  
-
 
     -- Function:
     --

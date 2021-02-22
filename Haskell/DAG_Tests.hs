@@ -3,6 +3,7 @@ module Tests where
     import Data.Maybe ( isJust, isNothing )
 
     -- Vertices for testing... 
+    g1 :: Graph Int
     (id1, g1) = addVertex initGraph 1
     (id2, g2) = addVertex g1 1
     (id3, g3) = addVertex g2 1
@@ -17,10 +18,30 @@ module Tests where
     g11 = addEdge g10 (2,3,1)
     g12 = addEdge g11 (5,2,1)
     g13 = addEdge g12 (6,2,1)
-    g14 = addEdge g13 (6,7,1)
+    g14 = addEdge g13 (6,7,2)
     g15 = addEdge g14 (7,8,1)
     g16 = addEdge g15 (4,7,1)
     g = addEdge g16 (4,1,1)
+
+
+    (idc1, gc1) = addVertex initGraph 'a'
+    (idc2, gc2) = addVertex gc1 'a'
+    (idc3, gc3) = addVertex gc2 'a'
+    (idc4, gc4) = addVertex gc3 'a'
+    (idc5, gc5) = addVertex gc4 'a'
+    (idc6, gc6) = addVertex gc5 'a'
+    (idc7, gc7) = addVertex gc6 'a'
+    (idc8, gc8) = addVertex gc7 'a'
+    -- Edges for testing...
+    gc9 = addEdge gc8 (2,1,'a')
+    gc10 = addEdge gc9 (2,8,'a')
+    gc11 = addEdge gc10 (2,3,'a')
+    gc12 = addEdge gc11 (5,2,'a')
+    gc13 = addEdge gc12 (6,2,'a')
+    gc14 = addEdge gc13 (6,7,'a')
+    gc15 = addEdge gc14 (7,8,'a')
+    gc16 = addEdge gc15 (4,7,'a')
+    gc = addEdge gc16 (4,1,'a')
 
 
     --------------------------------------------------------
@@ -29,14 +50,14 @@ module Tests where
 
 
     -- Returns True if there is a cycle, otherwise False
-    testHasCycle :: Eq w => Graph w -> Bool
+    testHasCycle :: Weight w => Graph w -> Bool
     testHasCycle g = isNothing (topologicalOrdering g)
 
 
     -- Returns true if Edge results in no cycles. 
     -- Ex: returns false when Edge (1,2,1) in inserted into
     -- g, because if results in a cycle.
-    testCanAddEdge :: Eq w => Graph w -> Edge w -> Bool
+    testCanAddEdge :: Weight w => Graph w -> Edge w -> Bool
     testCanAddEdge (Graph vs es) e
         | isJust result = True 
         | otherwise     = False
