@@ -104,7 +104,7 @@ module DAG (
     -- Computes the weight of the longest path between the vertices 
     -- s (start) and e (end).
     -- Input function f is used to interpret the weight of a vertex.
-    -- Input function g is used ti interpret the weight on an edge. 
+    -- Input function g is used to interpret the weight on an edge. 
     -- Input function comp used to get longest/shortest path. 
     -- Uses getAdjacentVertices, filterEdgesFromVertex, getAllPaths
     -- getPathInfo and calcPathWeight as helper functions. 
@@ -137,10 +137,13 @@ module DAG (
     getAdjacentVertices []             = []
     getAdjacentVertices ((_,end,_):es) = end : getAdjacentVertices es 
     
-    -- Function: GetAllPaths
+    -- Function: getAllPaths
     --
+    -- Works by finding all paths leading out from the starting vertex 
+    -- and filters out every path that does not end in ending vertex.
+    -- Uses getAdjacentVertices and filterEdgesFromVertex as 
+    -- helper functions. 
     -- Input: Graph , start, end, adjacent vertices, current path
-    -- Output: List of all paths. 
     getAllPaths :: G.Graph a -> G.VertexID -> G.VertexID -> [G.VertexID] ->
         [G.VertexID] -> [[G.VertexID]]
     getAllPaths _ _ end [] path = filterEndingVertices end [path]
