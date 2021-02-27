@@ -1,3 +1,5 @@
+package dag;
+
 public class StrWeight implements Weight<StrWeight> {
 
     private String weight;
@@ -19,7 +21,7 @@ public class StrWeight implements Weight<StrWeight> {
      * Comparison is defined alphabetical order. a < b < c ...
      * aa < ab < ac
      * aaa > aa
-     * @param b Weight to compare to.
+     * @param b dag.Weight to compare to.
      * @return
      */
     @Override

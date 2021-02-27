@@ -1,3 +1,5 @@
+package dag;
+
 public class Vertex<T> {
 
     private T weight;

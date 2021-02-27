@@ -1,6 +1,8 @@
+package dag;
+
 /**
  * This interface must be implemented by all objects that are to act as weights
- * in the Dag data structure.
+ * in the dag.Dag data structure.
  * @param <T> Type of the weight
  */
 public interface Weight<T> {
@@ -14,7 +16,7 @@ public interface Weight<T> {
 
     /**
      * The weights must be comparable in some way.
-     * @param b Weight to compare to.
+     * @param b dag.Weight to compare to.
      * @return How the relative size of this weight compares to b.
      */
     WeightComparison compare(T b);

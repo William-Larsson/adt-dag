@@ -1,3 +1,7 @@
+package alt;
+
+import dag.WeightComparison;
+
 public interface WeightMethods<T> {
 
     T getVertexWeight(T w);
@@ -10,13 +14,6 @@ public interface WeightMethods<T> {
      * @return The sum of the weights a and b.
      */
     T addWeights(T a, T b);
-
-    /**
-     * Gets the weight that corresponds to 0. E.g. for integers it is
-     * likely 0, and for strings the empty string, "".
-     * @return The zero weight.
-     */
-    T getZeroWeight();
 
     /**
      * Compares the given weights, and returns information about their relative

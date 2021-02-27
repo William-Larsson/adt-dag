@@ -1,24 +1,30 @@
+package alt;
+
+import dag.Edge;
+import dag.Vertex;
+import dag.WeightComparison;
 import exceptions.CyclicGraphException;
 
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * A general directed acyclic data (DAG) data structure. This data structure
- * is parameterized and can take any type that implements the Weight interface.
+ * is parameterized and can take any type that implements the dag.Weight interface.
  * @param <T> The type of the weights.
  */
-public class Dag<T extends Weight<T>> {
+public class Dag_alt<T> {
 
     private final List<Vertex<T>> vertices = new ArrayList<>();
+    private final WeightMethods<T> methods;
 
     // Maps a vertex to a list of all edges that exist from that vertex.
     private final Map<Vertex<T>, List<Edge<T>>> edgeMap = new HashMap<>();
     private Map<Vertex<T>, Integer> inCountMap = new HashMap<>();
     private final List<Edge<T>> allEdges = new ArrayList<>();
 
-
-    public Dag() {}
+    public Dag_alt(WeightMethods<T> methods) {
+        this.methods = methods;
+    }
 
     /**
      * Makes a shallow copy of the given dag. The copy will have the same
@@ -28,7 +34,8 @@ public class Dag<T extends Weight<T>> {
      * process modifies the
      * @param dag The dag to make a shallow copy of.
      */
-    public Dag(Dag<T> dag) {
+    public Dag_alt(Dag_alt<T> dag) {
+        this.methods = dag.methods;
         this.vertices.addAll(dag.vertices);
         this.edgeMap.putAll(dag.edgeMap);
         for (Vertex<T> key : dag.inCountMap.keySet()) {
@@ -67,7 +74,7 @@ public class Dag<T extends Weight<T>> {
     }
 
     /**
-     * Removes the edge from Vertex a to Vertex b, if such an edge exists.
+     * Removes the edge from dag.Vertex a to dag.Vertex b, if such an edge exists.
      * @param a From
      * @param b To
      */
@@ -80,10 +87,10 @@ public class Dag<T extends Weight<T>> {
 
     /**
      * Checks if the given vertex has any incoming edges.
-     * @param a Vertex to test if it has any incoming edges.
+     * @param a dag.Vertex to test if it has any incoming edges.
      * @return true if the vertex has no incoming edge; false otherwise.
      */
-    public boolean noIncomingEdge(Vertex<T> a) {
+    private boolean noIncomingEdge(Vertex<T> a) {
         Integer c = inCountMap.get(a);
         return c == null || c == 0;
     }
@@ -104,7 +111,7 @@ public class Dag<T extends Weight<T>> {
      * if the
      * @param a The vertex to reduce its in count.
      */
-    public void reduceInCount(Vertex<T> a) {
+    private void reduceInCount(Vertex<T> a) {
         int c = getInCount(a);
         if (c > 0)
             inCountMap.put(a, c-1);
@@ -115,7 +122,7 @@ public class Dag<T extends Weight<T>> {
      * @return A list containing the sorted elements.
      */
     public List<Vertex<T>> topologicalOrdering() {
-        Dag<T> graph = new Dag<>(this);
+        Dag_alt<T> graph = new Dag_alt<>(this);
         List<Vertex<T>> sortedList = new ArrayList<>();
         List<Vertex<T>> noIncomingEdgeList = new ArrayList<>();
 
@@ -193,13 +200,10 @@ public class Dag<T extends Weight<T>> {
      * Computes the weight of the longest path between the vertices a and b.
      * @param a Path start
      * @param b Path end
-     * @param f function for interpreting the weight of the vertices
-     * @param g function for interpreting the weight of the edges.
      * @return the weight of the longest path between a and b.
      */
-    public T weightOfLongestPath(Vertex<T> a, Vertex<T> b,
-                                 Function<T,T> f, Function<T, T> g) {
-        return weightOfPathComp(a, b, f, g, WeightComparison.GREATER_THAN);
+    public T weightOfLongestPath(Vertex<T> a, Vertex<T> b) {
+        return weightOfPathComp(a, b, WeightComparison.GREATER_THAN);
     }
 
     /**
@@ -208,34 +212,34 @@ public class Dag<T extends Weight<T>> {
      * LESS_THAN yields the shortest path, GREATER_THAN yields the longest path.
      * @param a Path start
      * @param b Path end
-     * @param f function for interpreting the weight of the vertices
-     * @param g function for interpreting the weight of the edges.
      * @return the weight of the path between a and b, using some comparison.
      */
     public T weightOfPathComp(Vertex<T> a, Vertex<T> b,
-                              Function<T,T> f, Function<T, T> g,
                               WeightComparison comp) {
+        if (methods == null){
+            throw new NullPointerException("No WeightMethods provided");
+        }
         List<List<Vertex<T>>> allPaths = getAllPaths(a, b);
 
         T currWeight = null;
         for (List<Vertex<T>> path : allPaths) {
 
-            T weight = f.apply(path.get(0).getWeight());
-            weight = weight.add(g.apply(findEdge(path.get(0),
-                                path.get(1)).getWeight()));
+            T weight = methods.getVertexWeight(path.get(0).getWeight());
+            weight = methods.addWeights(weight, methods.getEdgeWeight(
+                             findEdge(path.get(0), path.get(1)).getWeight()));
 
             for (int i = 1; i < path.size(); i++) {
                 Vertex<T> v = path.get(i);
-                weight = weight.add(f.apply(v.getWeight()));
+                weight = methods.addWeights(weight, methods.getVertexWeight(v.getWeight()));
                 // Find weight from current node to next node.
                 if (i < path.size() - 1) {
                     Edge<T> edge = findEdge(v, path.get(i+1));
-                    weight = weight.add(g.apply(edge.getWeight()));
+                    weight = methods.addWeights(weight, methods.getEdgeWeight(edge.getWeight()));
                 }
             }
 
             // If currWeight `compare` weight,  replace the current weight
-            if (currWeight == null || weight.compare(currWeight) == comp) {
+            if (currWeight == null || methods.compare(weight, currWeight) == comp) {
                 currWeight = weight;
             }
         }
@@ -275,8 +279,8 @@ public class Dag<T extends Weight<T>> {
 
     /**
      * Finds the edge that connects the vertices a and b.
-     * @param a Edge from
-     * @param b Edge to
+     * @param a dag.Edge from
+     * @param b dag.Edge to
      * @return edge connecting a and b, or null if such an edge does not exist.
      */
     public Edge<T> findEdge(Vertex<T> a, Vertex<T> b) {

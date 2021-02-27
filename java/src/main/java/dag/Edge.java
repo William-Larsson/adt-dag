@@ -1,3 +1,4 @@
+package dag;
 
 public class Edge <T> {
     private Vertex<T> from;

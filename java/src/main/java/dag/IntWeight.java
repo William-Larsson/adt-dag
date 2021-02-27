@@ -1,13 +1,15 @@
+package dag;
+
 /**
- * Implements the Weight interface such that this class can be used as  a weight
- * in the Dag data structure.
+ * Implements the dag.Weight interface such that this class can be used as  a weight
+ * in the dag.Dag data structure.
  */
 public class IntWeight implements Weight<IntWeight> {
 
     private final Integer intWeight;
 
     /**
-     * Constructs a new IntWeight and initializes the weight to the given value.
+     * Constructs a new dag.IntWeight and initializes the weight to the given value.
      * @param val Value to initialize to.
      */
     public IntWeight(int val) {
@@ -34,7 +36,7 @@ public class IntWeight implements Weight<IntWeight> {
 
     /**
      * Compares this weight with the given weight.
-     * @param b Weight to compare to.
+     * @param b dag.Weight to compare to.
      * @return The results of the comparison.
      */
     @Override

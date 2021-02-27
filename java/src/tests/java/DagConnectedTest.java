@@ -1,5 +1,5 @@
+import dag.*;
 import exceptions.CyclicGraphException;
-import jdk.jfr.StackTrace;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -126,7 +126,8 @@ public class DagConnectedTest {
         List<List<Vertex<IntWeight>>> paths = dag.getAllPaths(a, g);
         IntWeight longPath = dag.weightOfLongestPath(a, g, (i) -> i, (i) -> i);
 
-        IntWeight shortPath = dag.weightOfPathComp(a, g, i -> i, i -> i, WeightComparison.LESS_THAN);
+        IntWeight shortPath = dag.weightOfPathComp(a, g, i -> i, i -> i,
+                WeightComparison.LESS_THAN);
 
         assertEquals(51, longPath.getIntWeight());
         assertEquals(39, shortPath.getIntWeight());
@@ -165,7 +166,8 @@ public class DagConnectedTest {
 
         dag.addEdge(a, ca, new StrWeight(""));
 
-        StrWeight w = dag.weightOfPathComp(a, ca, i -> i, i -> i, WeightComparison.LESS_THAN);
+        StrWeight w = dag.weightOfPathComp(a, ca, i -> i, i -> i,
+                WeightComparison.LESS_THAN);
         StrWeight longest = dag.weightOfLongestPath(a, ca, i -> i, i -> i);
         StrWeight lPipe = dag.weightOfLongestPath(a, ca, i -> i, i -> new StrWeight("|"));
 
@@ -189,10 +191,10 @@ public class DagConnectedTest {
         dag.addEdge(b, d, new IntWeight(5));
 
         Dag<IntWeight> copy = new Dag<>(dag);
-        copy.reduceInCount(d);
-        copy.reduceInCount(d);
+        copy.removeEdge(a, d);
+        copy.removeEdge(b, d);
 
-        assertNotEquals(copy.getInCount(d), dag.getInCount(d));
+        assertNotEquals(dag.getInCount(d), copy.getInCount(d));
     }
 }
 
