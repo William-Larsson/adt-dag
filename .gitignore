@@ -120,3 +120,5 @@ node_modules/
 
 # MacOS
 .DS_Store
+*.o
+C/dag_test
