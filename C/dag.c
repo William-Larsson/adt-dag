@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "queue.h"
 #include "list.h"
 #include "dag.h"
 
@@ -45,17 +46,39 @@ struct Vertex *dag_add_vertex(struct Dag *d, void *w) {
 int dag_add_edge(struct Dag *d, struct Vertex *a, struct Vertex *b, void *w) {
     struct Edge *e = malloc(sizeof(*e));
 
+    if (e == NULL) {
+        return -1;
+    }
+
+    node *res = list_insert_after(d->e_list, NULL, e);
+    if (res == NULL) {
+        free(e);
+        return -1;
+    }
+
+
+
+    return 0;
+}
+
+int dag_is_connected(struct Dag *d, struct Vertex *a, struct Vertex *b) {
+    if (!d || !a || !b) return -1;
+
+    struct Queue *l = queue_create();
+
     return 0;
 }
 
 int dag_destroy(struct Dag *d, bool free_weight) {
-    struct Vertex *v = list_first(d->v_list);
-    while (v) {
+    struct node *n = list_first(d->v_list);
+
+    while (n) {
+        struct Vertex *v = list_inspect(n);
         if (free_weight)
             free(v->weight);
         free(v);
-        v = list_first(d->v_list);
+        n = list_first(d->v_list);
     }
-    
+
     return 0;
 }

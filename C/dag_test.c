@@ -26,10 +26,10 @@ void test_no_cycles(void) {
     struct Vertex *v1 = dag_add_vertex(d, &w1);
     struct Vertex *v2 = dag_add_vertex(d, &w2);
 
-    struct Edge *e1 = dag_add_edge(d, v1, v2, &w1); 
-    struct Edge *e2 = dag_add_edge(d, v2, v1, &w1); 
+    int res1 = dag_add_edge(d, v1, v2, &w1); 
+    int res2 = dag_add_edge(d, v2, v1, &w1); 
 
-    if (e2 != NULL) {
+    if (res2 != -1) {
         fprintf(stderr, "ERROR: test_no_cycles - Graph allows cycles!\n");
     } else {
         fprintf(stdout, "SUCCESS: dag_test\n");

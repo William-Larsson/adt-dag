@@ -6,14 +6,17 @@ CFLAGS += $(INC)
 
 all: dag_test
 
-dag_test: dag_test.c dag.o list.o
+dag_test: dag_test.c dag.o list.o queue.o
 	$(CC) $(CFLAGS) $^ -o $@
 
-dag: dag.o list.o
+dag: dag.o list.o queue.o
 	$(CC) $(CFLAGS) $^ -o $@
 
-dag.o: dag.c dag.h list.h
+dag.o: dag.c dag.h list.h queue.h
 	$(CC) $(CFLAGS) -c $<
 
 list.o: list.c list.h
+	$(CC) $(CFLAGS) -c $<
+
+queue.o: queue.c queue.h list.o
 	$(CC) $(CFLAGS) -c $<

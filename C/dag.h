@@ -36,6 +36,8 @@ struct Vertex *dag_add_vertex(struct Dag *d, void *w);
  */
 int dag_add_edge(struct Dag *d, struct Vertex *a, struct Vertex *b, void *w);
 
+int dag_is_connected(struct Dag *d, struct Vertex *a, struct Vertex *b);
+
 int dag_destroy(struct Dag *d, bool free_weight);
 
 
