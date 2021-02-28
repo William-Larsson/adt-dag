@@ -133,6 +133,24 @@ int list_remove_after(list *l, node *n) {
     return 0;
 }
 
+// TODO: The list should keep track of last element such that this
+// function can be O(1)
+node *list_get_last(list *l) {
+    node *n = list_first(l);
+    node *last = n;
+    
+    while (n != NULL) {
+        last = n;
+        n = list_next(n);
+    }
+
+    return last;
+}
+
+int list_insert_last(list *l, void *val) {
+    list_insert_after(l, list_get_last(l), val);
+}
+
 /**
  * list_destroy() - Frees memory used by the list.
  * l: List structure to be freed.

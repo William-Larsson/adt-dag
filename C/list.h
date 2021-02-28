@@ -84,6 +84,10 @@ node *list_insert_after(list *l, node *n, void *val);
  */
 int list_remove_after(list *l, node *n);
 
+node *list_get_last(list *l);
+
+int list_insert_last(list *l, void *val);
+
 /**
  * list_destroy() - Frees memory used by the list.
  * l: List structure to be freed.

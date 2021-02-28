@@ -105,6 +105,65 @@ int dag_is_connected(struct Dag *d, struct Vertex *a, struct Vertex *b) {
     return 0;
 }
 
+void *dag_weight_of_longest_path(struct Dag *d, 
+                                struct Vertex *a, struct Vertex *b,
+                                weight_func f, weight_func g) {
+    return NULL;
+}
+
+struct list *dag_topological_ordering(struct Dag *d) {
+
+    return NULL;
+}
+
+/**
+ * Each element in the list is a list of vertices describing the path.
+ * returns - a list of all paths.
+ */
+struct list *dag_get_all_paths(struct Dag *d, struct Vertex *a, struct Vertex *b) {
+    struct list *all_paths = list_create();
+
+    struct Queue *queue = queue_create();
+    struct list *first_path = list_create();
+
+    list_insert_after(first_path, NULL, a);
+    queue_enqueue(queue, first_path);
+
+    while(!queue_is_empty(queue)) {
+        struct list *path = queue_dequeue(queue)->value;
+        struct Vertex *next = list_get_last(path)->value;
+
+        if (next->id == b->id) {
+            // The end of a path
+            list_insert_last(all_paths, path);
+        }
+
+        // Find all nodes we can reach from `next`
+        struct list *l = d->e_list;
+        struct node *n = list_first(l);
+        while (n != NULL) {
+            struct Edge *e = n->value;
+            if (next->id == e->from->id) {
+                // create new path
+                struct list *new_path = list_create();
+                // copy path to new_path
+                struct node *it = list_first(path);
+                while (it != NULL) {
+                    list_insert_last(new_path, it->value);
+
+                    it = list_next(it);
+                }
+                list_insert_last(new_path, e->to);
+                queue_enqueue(queue, new_path);
+            }
+
+            n = list_next(n);
+        }
+    }
+
+    return all_paths;
+}
+
 int dag_destroy(struct Dag *d, bool free_weight) {
     struct node *n = list_first(d->v_list);
 
