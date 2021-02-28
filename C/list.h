@@ -13,6 +13,15 @@ typedef struct list list;
 typedef struct node node;
 typedef int val_cmp_func(const void *, const void *);
 
+struct node {
+    void *value;
+    struct node *next;
+};
+
+struct list {
+    struct node *head;
+};
+
 /**
  * list_create() - Creates a new empty list.
  * Returns: The newly created list or NULL if malloc fails when allocating 

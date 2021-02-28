@@ -31,19 +31,23 @@ struct Vertex *dag_add_vertex(struct Dag *d, void *w) {
         return NULL;
     }
 
-
     node *res = list_insert_after(d->v_list, NULL, v);
     if (res == NULL) {
         free(v);
         return NULL;
     }
 
+    res->value = v;
     v->id = d->id++;
     v->weight = w;
 
-    return NULL;
+    return v;
 }
 int dag_add_edge(struct Dag *d, struct Vertex *a, struct Vertex *b, void *w) {
+    // this would lead to a cycle
+    if (dag_is_connected(d, b, a) == 1) {
+        return -1;
+    }
     struct Edge *e = malloc(sizeof(*e));
 
     if (e == NULL) {
@@ -56,15 +60,47 @@ int dag_add_edge(struct Dag *d, struct Vertex *a, struct Vertex *b, void *w) {
         return -1;
     }
 
-
+    res->value = e;
+    e->from = a;
+    e->to = b;
+    e->weight = w;
 
     return 0;
 }
 
+/**
+ * returns: 1 if connected; 0 if not connected; -1 if an error occurred.
+ */
 int dag_is_connected(struct Dag *d, struct Vertex *a, struct Vertex *b) {
     if (!d || !a || !b) return -1;
 
-    struct Queue *l = queue_create();
+    struct Queue *q = queue_create();
+    if (q == NULL) {
+        return -1;
+    }
+
+    queue_enqueue(q, a);
+
+    while(!queue_is_empty(q)) {
+        struct node *next = queue_dequeue(q);
+        struct Vertex *v = next->value;
+
+        if (v->id == b->id) {
+            return 1;
+        }
+
+        // Find all nodes we can reach from v
+        struct list *l = d->e_list;
+        struct node *n = list_first(l);
+        while (n != NULL) {
+            struct Edge *e = n->value;
+            if (v->id == e->from->id) {
+                queue_enqueue(q, e->to);
+            }
+
+            n = list_next(n);
+        }
+    }
 
     return 0;
 }

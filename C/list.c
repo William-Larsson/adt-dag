@@ -8,15 +8,6 @@
  * Implementation of a singly linked list. 
  */
 
-struct  node {
-    void *value;
-    struct node *next;
-};
-
-struct list {
-    struct node *head;
-};
-
 /**
  * list_create() - Creates a new empty list.
  * Returns: The newly created list or NULL if malloc fails when allocating 

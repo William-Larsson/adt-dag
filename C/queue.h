@@ -4,7 +4,6 @@
 
 
 struct Queue {
-    struct list *l;
     struct node *first;
     struct node *last;
 };
@@ -18,13 +17,16 @@ int queue_enqueue(struct Queue *q, void *e);
 
 /**
  * removes an element from the beginning of the queue 
+ * returns - the node that was dequeued.
  */
-int queue_dequeue(struct Queue *q);
+struct node *queue_dequeue(struct Queue *q);
 
 /**
  * retrieves the element first in the queue
  */
-int queue_peek(struct Queue *q);
+struct node *queue_peek(struct Queue *q);
+
+bool queue_is_empty(struct Queue *q);
 
 
 #endif
