@@ -1,8 +1,28 @@
-module Tests where
-    import DAG
+-- Module: DAG_Tests
+--
+-- A set of tests to ensure that the DAG implementations 
+-- is working as intended. 
+module DAG_Tests where
+    import DAG ( 
+        Weight (..),
+        VertexID,
+        Edge,
+        addVertex,
+        initGraph,
+        Graph(..),
+        addEdge,
+        topologicalOrdering,
+        weightOfLongestPath,
+        weightOfShortestPath)
     import Data.Maybe ( isJust, isNothing )
 
-    -- Vertices for testing... 
+
+    --------------------------------------------------------
+    -- Test Graphs -----------------------------------------
+    --------------------------------------------------------
+
+
+    -- Vertices for testing int
     g1 :: Graph Int
     (id1, g1) = addVertex initGraph 1
     (id2, g2) = addVertex g1 1
@@ -12,18 +32,28 @@ module Tests where
     (id6, g6) = addVertex g5 1
     (id7, g7) = addVertex g6 1
     (id8, g8) = addVertex g7 1
-    -- Edges for testing...
+
+    -- Edges for testing int 
     g9 = addEdge g8 (2,1,1)
     g10 = addEdge g9 (2,8,1)
     g11 = addEdge g10 (2,3,1)
     g12 = addEdge g11 (5,2,1)
     g13 = addEdge g12 (6,2,1)
-    g14 = addEdge g13 (6,7,2)
+    g14 = addEdge g13 (6,7,1)
     g15 = addEdge g14 (7,8,1)
     g16 = addEdge g15 (4,7,1)
+
+
+    -- Test Graph g. 
+    -- Weights are int, no cycles
     g = addEdge g16 (4,1,1)
 
 
+    -- Same as g, but with an added cycle through manual 
+    -- manipulation of edge array. 
+    gWithCycle = Graph (vertices g) ((1,2,1):edges g)
+
+    -- Vertices for testing Char
     (idc1, gc1) = addVertex initGraph 'a'
     (idc2, gc2) = addVertex gc1 'a'
     (idc3, gc3) = addVertex gc2 'a'
@@ -32,7 +62,8 @@ module Tests where
     (idc6, gc6) = addVertex gc5 'a'
     (idc7, gc7) = addVertex gc6 'a'
     (idc8, gc8) = addVertex gc7 'a'
-    -- Edges for testing...
+    
+    -- Edges for testing Char
     gc9 = addEdge gc8 (2,1,'a')
     gc10 = addEdge gc9 (2,8,'a')
     gc11 = addEdge gc10 (2,3,'a')
@@ -41,6 +72,10 @@ module Tests where
     gc14 = addEdge gc13 (6,7,'a')
     gc15 = addEdge gc14 (7,8,'a')
     gc16 = addEdge gc15 (4,7,'a')
+
+
+    -- Test Graph gc. 
+    -- Same as g, but with Char weights.
     gc = addEdge gc16 (4,1,'a')
 
 
@@ -49,64 +84,56 @@ module Tests where
     --------------------------------------------------------
 
 
-    -- Returns True if there is a cycle, otherwise False
-    testHasCycle :: Weight w => Graph w -> Bool
-    testHasCycle g = isNothing (topologicalOrdering g)
+    -- Tests for asserting proper addEdge functionality
+    addEdgeTest        = addEdge g (6, 8, 1)
+    addEdgeCharTest    = addEdge gc (6, 8, 'p')
+    addEdgeNoStartTest = addEdge g (100, 1, 1)
+    addEdgeNoEndTest   = addEdge g (1, 100, 1)
+    addEdgeNoCycleTest = addEdge g (1, 2, 1)
 
+    -- Tests for asserting proper topological ordering
+    hasNoCycleTest = isJust (topologicalOrdering g)
+    hasCycleTest   = isNothing (topologicalOrdering gWithCycle)
 
-    -- Returns true if Edge results in no cycles. 
-    -- Ex: returns false when Edge (1,2,1) in inserted into
-    -- g, because if results in a cycle.
-    testCanAddEdge :: Weight w => Graph w -> Edge w -> Bool
-    testCanAddEdge (Graph vs es) e
-        | isJust result = True 
-        | otherwise     = False
-        where
-            result = topologicalOrdering $ Graph vs (e:es)
+    topologicalOrdTest    = topologicalOrdering g
+    noTopologicalOrdTest  = topologicalOrdering gWithCycle
+    
+    -- Tests for asserting proper longest/shortest path functionality
+    longestOfPathIntTest   = weightOfLongestPath g 6 8 id id 
+    shortestOfPathIntTest  = weightOfShortestPath g 6 8 id id 
+    longestOfPathIntTest2  = weightOfLongestPath (addEdge g (6,8,1)) 6 8 id id 
+    shortestOfPathIntTest2 = weightOfShortestPath (addEdge g (6,8,1)) 6 8 id id 
+    longestOfPathCharTest  = weightOfLongestPath gc 6 8 id id 
+    shortestOfPathCharTest = weightOfShortestPath gc 6 8 id id 
 
+    -- Tests for asserting Weight type class addition
+    addIntTest :: Int
+    addIntTest     = DAG.add 1 2
 
+    addIntegerTest :: Integer
+    addIntegerTest = DAG.add 1 2
 
+    addFloatTest :: Float
+    addFloatTest   = DAG.add 0.9 2.1
 
-    --------------------------------------------------------
-    -- Notes -----------------------------------------------
-    --------------------------------------------------------
+    addDoubleTest :: Double
+    addDoubleTest  = DAG.add 1.0 2.0
 
+    addCharTest :: Char
+    addCharTest    = DAG.add '0' '1'
+    
+    -- Tests for asserting Weight type class comparison
+    compareIntTest :: Ordering
+    compareIntTest     = DAG.compare (1::Int) (2::Int)
 
--- Create a few DAGs, and test that the output is correct with what's 
--- expected. 
+    compareIntegerTest :: Ordering
+    compareIntegerTest = DAG.compare (2::Integer) (2::Integer)
 
+    compareFloatTest :: Ordering
+    compareFloatTest   = DAG.compare (2::Float) (1::Float)
 
+    compareDoubleTest :: Ordering
+    compareDoubleTest  = DAG.compare (1::Double) (2::Double)
 
--- For longest path:
--- same type: weight for Vertices and Edges must be same
--- must be able to sum two weights somehow
--- must be able to compare weights (Eq, Ord?)
-
-
-
--- Shortest path --> is it possible to create a higher order func that take function of 
--- (< or >) so that longest and shorted path can be the same basic func?
-
-
-
--- Following Kahn's algorithm:
---
--- Input: 
---      The Graph, G
-
--- Algorithm:
---  ✅  0. Create empty list "L" that will contain sorted elements
---  ✅     Create Set/stack/queue "S" of all nodes with no incoming edges (noIncomingEdges)
---      
---  ✅  1.  Recursively take first elem "n" from "S"
---  ✅  1.1 Remove "n" from "S"
---  ✅  1.2 Add "n" to "L"
---
---  ✅  2.  Filter all edges "e" that start at "n" and goes to "m"
---      2.1 Recursively, do:
---  ✅  2.1.1 Remove "e" from "G"
---  ✅  2.1.2 if "m" has no incoming edges -> insert "m" to "S"
---  ✅  2.1.3 Return to 1.1
---
---  ✅  3.  if "G" has edge --> error (there is a cycle) return Nothing
---  ✅  3.1 else return Just L (the topological sort)
+    compareCharTest :: Ordering
+    compareCharTest    = DAG.compare ('a'::Char) ('b'::Char)

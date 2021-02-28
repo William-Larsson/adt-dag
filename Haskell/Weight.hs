@@ -42,6 +42,6 @@ module Weight ( Weight (..) ) where
     -- of type class Weight. 
     weightCompare :: Weight w => w -> w -> Ordering 
     weightCompare w1 w2 
-            | w1 == w1  = EQ 
+            | w1 == w2  = EQ 
             | w1 > w2   = GT 
             | otherwise = LT 
