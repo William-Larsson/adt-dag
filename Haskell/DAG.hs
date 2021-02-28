@@ -113,7 +113,7 @@ module DAG (
     -- Uses getAdjacentVertices, filterEdgesFromVertex, getAllPaths
     -- getPathInfo and calcPathWeight as helper functions. 
     weightOfPathComp :: W.Weight w => G.Graph w -> Integer -> Integer 
-        -> (w -> w) -> (w -> w) -> ([Maybe w] -> Maybe a) -> Maybe a
+        -> (w -> w) -> (w -> w) -> ([Maybe w] -> Maybe w) -> Maybe w
     weightOfPathComp graph@(G.Graph _ es) start end f g comp = maxWeight
         where 
             startAdj    = getAdjacentVertices $ filterEdgesFromVertex start es  
