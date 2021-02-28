@@ -39,7 +39,7 @@ module Graph (
             id = fromIntegral (length vs + 1)
             vx = (id, w)  
 
-    -- Function:
+    -- Function: addEdge
     --
     -- Adds an edge into the graph. 
     addEdge :: Graph w -> Edge w -> Graph w

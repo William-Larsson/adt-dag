@@ -27,16 +27,20 @@ module DAG (
     -- Adds edge to graph if no cycle is introduced and 
     -- the start of the edge exist as a vertex in graph. 
     addEdge :: W.Weight w => G.Graph w -> G.Edge w -> G.Graph w
-    addEdge (G.Graph vs es) ed@(eid,_,_)
+    addEdge (G.Graph vs es) ed@(ids,ide,_)
         | not startExists = error noStart
+        | not endExists   = error noEnd
         | isJust topOrd   = newGraph
         | otherwise       = error hasCycle
         where
-            startExists = any (\(vid,_) -> vid == eid) vs 
-            newGraph    = G.Graph vs (ed:es)
-            topOrd      = topologicalOrdering newGraph 
-            noStart     = "Cannot add edge - start vertex does not exist"
-            hasCycle    = "Cannot add edge - would result in cycle!"
+            (startExists, endExists) = foldl 
+                (\(srt, end) (idv,_) -> (srt || idv == ids, end || idv == ide)) 
+                (False, False) vs
+            newGraph = G.Graph vs (ed:es)
+            topOrd   = topologicalOrdering newGraph 
+            noStart  = "Cannot add edge - start vertex does not exist."
+            noEnd    = "Cannot add edge - end vertex does not exist."
+            hasCycle = "Cannot add edge - would result in cycle."
     
     -- Function: removeEdge
     --
@@ -144,18 +148,18 @@ module DAG (
     -- Uses getAdjacentVertices and filterEdgesFromVertex as 
     -- helper functions. 
     -- Input: Graph , start, end, adjacent vertices, current path
-    getAllPaths :: G.Graph a -> G.VertexID -> G.VertexID -> [G.VertexID] ->
+    getAllPaths :: G.Graph w -> G.VertexID -> G.VertexID -> [G.VertexID] ->
         [G.VertexID] -> [[G.VertexID]]
     getAllPaths _ _ end [] path = filterEndingVertices end [path]
 
     getAllPaths g@(G.Graph vs es) start end [adj] path 
-        | start == end = filterEndingVertices end [path]    
+        | start == end = [path]    
         | otherwise    =
         getAllPaths g adj end 
             (getAdjacentVertices $ filterEdgesFromVertex adj es) (path ++ [adj]) 
 
     getAllPaths g@(G.Graph vs es) start end (adj:as) path 
-        | start == end = filterEndingVertices end [path] 
+        | start == end = [path] 
         | otherwise    =
         getAllPaths g adj end 
             (getAdjacentVertices $ filterEdgesFromVertex adj es) (path ++ [adj]) 
