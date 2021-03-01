@@ -65,6 +65,8 @@ int dag_add_edge(struct Dag *d, struct Vertex *a, struct Vertex *b, void *w) {
     e->to = b;
     e->weight = w;
 
+    b->in_count++;
+
     return 0;
 }
 

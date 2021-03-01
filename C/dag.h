@@ -18,6 +18,7 @@ enum WeightComp {
 
 struct Vertex {
     int id;
+    int in_count;
     void *weight;
 };
 
