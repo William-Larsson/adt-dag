@@ -205,6 +205,7 @@ void *dag_weight_of_longest_path(struct Dag *d,
                 weight = d->add(weight, g(edge->weight));
             }
             
+            free(v_it);
             v_it = list_next(v_it);
             i++;
         }
@@ -213,8 +214,10 @@ void *dag_weight_of_longest_path(struct Dag *d,
             curr_weight = weight;
         }
 
+        free(n);
         n = list_next(n);
     }
+
     return curr_weight;
 }
 
@@ -267,6 +270,7 @@ struct list *dag_topological_ordering(struct Dag *d) {
  * Each element in the list is a list of vertices describing the path.
  * returns - a list of all paths.
  */
+//TODO: This still leaks memory.
 struct list *dag_get_all_paths(struct Dag *d, struct Vertex *a, struct Vertex *b) {
     struct list *all_paths = list_create();
 
@@ -277,8 +281,11 @@ struct list *dag_get_all_paths(struct Dag *d, struct Vertex *a, struct Vertex *b
     queue_enqueue(queue, first_path);
 
     while(!queue_is_empty(queue)) {
-        struct list *path = queue_dequeue(queue)->value;
+        struct node *p = queue_dequeue(queue);
+        struct list *path = p->value;
         struct Vertex *next = list_get_last(path)->value;
+
+        free(p);
 
         if (next->id == b->id) {
             // The end of a path
@@ -300,6 +307,7 @@ struct list *dag_get_all_paths(struct Dag *d, struct Vertex *a, struct Vertex *b
 
                     it = list_next(it);
                 }
+
                 list_insert_last(new_path, e->to);
                 queue_enqueue(queue, new_path);
             }
@@ -307,6 +315,9 @@ struct list *dag_get_all_paths(struct Dag *d, struct Vertex *a, struct Vertex *b
             n = list_next(n);
         }
     }
+
+    queue_destroy(queue);
+    list_destroy(first_path);
 
     return all_paths;
 }

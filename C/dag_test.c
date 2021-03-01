@@ -14,9 +14,9 @@ void test_small_topological_ordering(void);
 
 int main(void) {
     //test_no_cycles();
-    test_connected();
-    // test_connected_large();
-    // test_all_paths();
+    //test_connected();
+    //test_connected_large();
+    test_all_paths();
     // test_longest_path();
     // test_small_topological_ordering();
     // test_topological_ordering();
@@ -113,6 +113,7 @@ void test_connected_large(void) {
         fprintf(stderr, "ERROR: test_connected_large, connect fail");
     }
 
+    dag_destroy(d, false);
 }
 
 void test_no_cycles(void) {
@@ -170,13 +171,19 @@ void test_all_paths(void) {
         while (v_it != NULL) {
             struct Vertex *v = v_it->value;
             fprintf(stdout, "%d ", v->id);
+
+            free(v_it);
             v_it = list_next(v_it);
         }
-
         fprintf(stdout, "\n");
 
+        list_destroy(path);
+        free(n);
         n = list_next(n);
     }
+
+    list_destroy(all_paths);
+    dag_destroy(d, false);
 }
 
 enum WeightComp int_compare(void *a_v, void *b_v);
