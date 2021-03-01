@@ -29,6 +29,7 @@ int queue_enqueue(struct Queue *q, void *e) {
         return -1;
     }
 
+    n->next = NULL;
     n->value = e;
     if (q->first == NULL || q->last == NULL) {
         q->first = n;
@@ -65,4 +66,16 @@ struct node *queue_peek(struct Queue *q) {
 
 bool queue_is_empty(struct Queue *q) {
     return q->first == NULL;
+}
+
+int queue_destroy(struct Queue *q) {
+    node *n = queue_dequeue(q);
+
+    while (n != NULL) {
+        free(n);
+
+        n = queue_dequeue(q);
+    }
+
+    free(q);
 }

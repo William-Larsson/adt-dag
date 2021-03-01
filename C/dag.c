@@ -150,6 +150,8 @@ int dag_is_connected(struct Dag *d, struct Vertex *a, struct Vertex *b) {
         struct Vertex *v = next->value;
 
         if (v->id == b->id) {
+            free(next);
+            free(q);
             return 1;
         }
 
@@ -164,7 +166,11 @@ int dag_is_connected(struct Dag *d, struct Vertex *a, struct Vertex *b) {
 
             n = list_next(n);
         }
+
+        free(next);
     }
+
+    queue_destroy(q);
 
     return 0;
 }
@@ -306,15 +312,29 @@ struct list *dag_get_all_paths(struct Dag *d, struct Vertex *a, struct Vertex *b
 }
 
 int dag_destroy(struct Dag *d, bool free_weight) {
-    struct node *n = list_first(d->v_list);
-
-    while (n) {
-        struct Vertex *v = list_inspect(n);
+    while (list_first(d->v_list)) {
+        struct Vertex *v = list_first(d->v_list)->value;
         if (free_weight)
             free(v->weight);
         free(v);
-        n = list_first(d->v_list);
+
+        list_remove_after(d->v_list, NULL);
     }
+
+    while (list_first(d->e_list)) {
+        struct Edge *e = list_first(d->e_list)->value;
+        if (free_weight) {
+            free(e->weight);
+        }
+        free(e);
+
+        list_remove_after(d->e_list, NULL);
+    }        
+
+    list_destroy(d->v_list);
+    list_destroy(d->e_list);
+
+    free(d);
 
     return 0;
 }

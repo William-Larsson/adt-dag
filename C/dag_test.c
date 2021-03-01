@@ -13,13 +13,13 @@ void test_topological_ordering(void);
 void test_small_topological_ordering(void);
 
 int main(void) {
-    // test_no_cycles();
-    // test_connected();
+    //test_no_cycles();
+    test_connected();
     // test_connected_large();
     // test_all_paths();
     // test_longest_path();
-    test_small_topological_ordering();
-    test_topological_ordering();
+    // test_small_topological_ordering();
+    // test_topological_ordering();
 
     return 0;
 }
@@ -128,12 +128,11 @@ void test_no_cycles(void) {
         fprintf(stderr, "ERROR: test_no_cycles - Graph allows cycles!\n");
     }
 
-    //dag_destroy(d, false);
+    dag_destroy(d, false);
 }
 
 void test_all_paths(void) {
      struct Dag *d = dag_create();
-
 
     // all paths from A to C
     // A (0) -> B (1) -> C (2)

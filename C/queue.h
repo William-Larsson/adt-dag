@@ -28,5 +28,6 @@ struct node *queue_peek(struct Queue *q);
 
 bool queue_is_empty(struct Queue *q);
 
+int queue_destroy(struct Queue *q);
 
 #endif
