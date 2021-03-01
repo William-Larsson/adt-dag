@@ -25,6 +25,34 @@ struct Dag *dag_create(void) {
     return d;
 }
 
+/**
+ * Creates a deep clone of the given dag.
+ */
+struct Dag *dag_clone(struct Dag *d) {
+    struct Dag *clone = dag_create();
+    clone->id = d->id;
+    clone->add = d->add;
+    clone->comp = d->comp;
+
+    struct list *v_list = d->v_list;
+    node *v_it = list_first(d->v_list);
+    while(v_it != NULL) {
+        list_insert_after(clone->v_list, NULL, v_it->value);
+
+        v_it = list_next(v_it);
+    }
+
+    struct list *e_list = d->e_list;
+    node *e_it = list_first(d->e_list);
+    while (e_it != NULL) {
+        list_insert_after(clone->e_list, NULL, e_it->value);
+
+        e_it = list_next(e_it);
+    }
+
+    return clone;
+}
+
 struct Vertex *dag_add_vertex(struct Dag *d, void *w) {
     struct Vertex *v = malloc(sizeof(*v));
     if (v == NULL) {
@@ -83,6 +111,25 @@ struct Edge *dag_find_edge(struct Dag *d, struct Vertex *a, struct Vertex *b) {
     }
 
     return NULL;
+}
+
+/**
+ * Gets all edges from the given node.
+ * 
+ */
+struct list *dag_get_edges_from(struct Dag *d, struct Vertex *a) {
+    struct list *res = list_create();
+    struct node *e_it = list_first(d->e_list);
+
+    while (e_it != NULL) {
+        struct Edge *e = e_it->value;
+        if (e->from->id == a->id) {
+            list_insert_last(res, e);
+        }
+        e_it = list_next(e_it);
+    }
+
+    return res;
 }
 
 /**
@@ -166,8 +213,48 @@ void *dag_weight_of_longest_path(struct Dag *d,
 }
 
 struct list *dag_topological_ordering(struct Dag *d) {
+    struct Dag *graph = dag_clone(d);
 
-    return NULL;
+    struct list *sorted_list = list_create();
+    struct list *no_incoming_edges = list_create();
+
+    // Store all vertices with no incoming edges in the given list.
+    struct node *n = list_first(graph->v_list);
+    while (n != NULL) {
+        struct Vertex *v = n->value;
+        if (v->in_count == 0) {
+            list_insert_after(no_incoming_edges, NULL, v);
+        }
+        n = list_next(n);
+    }
+
+    // TODO: Figure out why this is an infinite loop
+    while(no_incoming_edges->size > 0 && list_first(no_incoming_edges)) {
+        struct Vertex *f_node = list_first(no_incoming_edges)->value;
+        list_insert_last(sorted_list, f_node);
+        list_remove_after(no_incoming_edges, NULL);
+        
+
+        struct list *edges = dag_get_edges_from(graph, f_node);
+        if (edges->size > 0) {
+            // Loop through all edges that have an edge from `node`
+            struct node *iterator = list_first(edges);
+            while (iterator != NULL) {
+                struct Edge *edge = iterator->value;
+                edge->to->in_count--;
+
+                list_remove_after(edges, NULL);
+
+                if (edge->to->in_count == 0) {
+                    list_insert_last(no_incoming_edges, edge->to);
+                }
+
+                iterator = list_first(edges);
+            }
+        }
+    }
+
+    return sorted_list;
 }
 
 /**

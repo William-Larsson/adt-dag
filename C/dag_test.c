@@ -9,13 +9,17 @@ void test_connected_large(void);
 void test_no_cycles(void);
 void test_all_paths(void);
 void test_longest_path(void);
+void test_topological_ordering(void);
+void test_small_topological_ordering(void);
 
 int main(void) {
-    test_no_cycles();
-    test_connected();
-    test_connected_large();
-    test_all_paths();
-    test_longest_path();
+    // test_no_cycles();
+    // test_connected();
+    // test_connected_large();
+    // test_all_paths();
+    // test_longest_path();
+    test_small_topological_ordering();
+    test_topological_ordering();
 
     return 0;
 }
@@ -29,11 +33,11 @@ void test_connected(void) {
     struct Vertex *v2 = dag_add_vertex(d, &w2);
     struct Vertex *v3 = dag_add_vertex(d, &w3);
 
-    int res1 = dag_add_edge(d, v1, v2, &w1); 
-    int res2 = dag_add_edge(d, v2, v3, &w1); 
-    int res3 = dag_add_edge(d, v1, v3, &w1); 
+    int res = dag_add_edge(d, v1, v2, &w1); 
+    res -= dag_add_edge(d, v2, v3, &w1); 
+    res -= dag_add_edge(d, v1, v3, &w1); 
 
-    if (res1 < 0 || res2 < 0 || res3 < 0) {
+    if (res < 0) {
         fprintf(stderr, "ERROR: test_connected: fail to add edge\n");
     }
 
@@ -69,7 +73,6 @@ void test_connected_large(void) {
     struct Vertex *B = dag_add_vertex(d, &w2);
     struct Vertex *C = dag_add_vertex(d, &w3);
     struct Vertex *D = dag_add_vertex(d, &w3);
-    struct Vertex *E = dag_add_vertex(d, &w3);
     struct Vertex *F = dag_add_vertex(d, &w3);
     struct Vertex *G = dag_add_vertex(d, &w3);
     struct Vertex *I = dag_add_vertex(d, &w3);
@@ -118,7 +121,7 @@ void test_no_cycles(void) {
     struct Vertex *v1 = dag_add_vertex(d, &w1);
     struct Vertex *v2 = dag_add_vertex(d, &w2);
 
-    int res1 = dag_add_edge(d, v1, v2, &w1); 
+    dag_add_edge(d, v1, v2, &w1); 
     int res2 = dag_add_edge(d, v2, v1, &w1); 
 
     if (res2 != -1) {
@@ -175,6 +178,10 @@ void test_all_paths(void) {
     }
 }
 
+enum WeightComp int_compare(void *a_v, void *b_v);
+void *add_ints(void *a_v, void *b_v);
+void *get_int(void *a_v);
+
 enum WeightComp int_compare(void *a_v, void *b_v) {
     int *a = (int*) a_v;
     int *b = (int*) b_v;
@@ -206,7 +213,7 @@ void test_longest_path(void) {
     // A (0) -> B (1) -> C (2) -- cost: 1 + 1 + 2 + 1 + 4 = 9
     // A (0) -> D (3) -> C (2) -- cost: 1 + 1 + 4 + 1 + 3 = 10
     // A (0) -> E (4) -> C (2) -- cost: 1 + 1 + 5 + 1 + 3 = 11
-    int w0 = 0, w1 = 1, w2 = 2, w3 = 3, w4 = 4, w5 = 5;
+    int w1 = 1, w2 = 2, w3 = 3, w4 = 4, w5 = 5;
     struct Vertex *A = dag_add_vertex(d, &w1);
     struct Vertex *B = dag_add_vertex(d, &w2);
     struct Vertex *C = dag_add_vertex(d, &w3);
@@ -231,4 +238,65 @@ void test_longest_path(void) {
     if (*weight != 11) {
         fprintf(stderr, "ERROR: test_longest_path - incorrecct weight %d\n", *weight);
     }
+}
+
+void test_small_topological_ordering(void) {
+     struct Dag *d = dag_create();
+
+    int w1 = 1, w2 = 2, w3 = 3, w4 = 4;
+    struct Vertex *A = dag_add_vertex(d, &w1);
+    struct Vertex *B = dag_add_vertex(d, &w2);
+    struct Vertex *C = dag_add_vertex(d, &w3);
+    struct Vertex *D = dag_add_vertex(d, &w4);
+
+    int res = 0;
+    res -= dag_add_edge(d, A, B, &w1); 
+    res -= dag_add_edge(d, A, C, &w1);   
+    res -= dag_add_edge(d, B, D, &w1);   
+
+    struct list *l = dag_topological_ordering(d);
+    struct node *it = list_first(l);
+
+    fprintf(stdout, "Order: ");
+    while (it != NULL) {
+        struct Vertex *v = it->value;
+        fprintf(stdout, "%d ", v->id);
+
+        it = list_next(it);
+    }   
+
+    fprintf(stdout, "\n");
+}
+
+void test_topological_ordering(void) {
+    struct Dag *d = dag_create();
+
+    int w1 = 1, w2 = 2, w3 = 3, w4 = 4, w5 = 5, w6 = 6, w7 = 7;
+    struct Vertex *A = dag_add_vertex(d, &w1);
+    struct Vertex *B = dag_add_vertex(d, &w2);
+    struct Vertex *C = dag_add_vertex(d, &w3);
+    struct Vertex *D = dag_add_vertex(d, &w4);
+    struct Vertex *E = dag_add_vertex(d, &w5);
+    struct Vertex *F = dag_add_vertex(d, &w6);
+    struct Vertex *G = dag_add_vertex(d, &w7);
+
+    int res = 0;
+    res -= dag_add_edge(d, A, B, &w1); 
+    res -= dag_add_edge(d, B, E, &w1); 
+    res -= dag_add_edge(d, B, C, &w1); 
+    res -= dag_add_edge(d, B, D, &w1); 
+    res -= dag_add_edge(d, E, F, &w1); 
+    res -= dag_add_edge(d, F, G, &w1);  
+
+    struct list *l = dag_topological_ordering(d);
+    struct node *it = list_first(l);
+
+    fprintf(stdout, "Order: ");
+    while (it != NULL) {
+        struct Vertex *v = it->value;
+        fprintf(stdout, "%d ", v->id);
+
+        it = list_next(it);
+    }
+    fprintf(stdout, "\n");
 }

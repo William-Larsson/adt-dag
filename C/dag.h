@@ -37,6 +37,7 @@ struct Dag {
 };
 
 struct Dag *dag_create(void);
+struct Dag *dag_clone(struct Dag *d);
 
 /**
  * Adds a new vertex to the graph. The Vertex will have weight w
