@@ -60,6 +60,8 @@ void test_connected(void) {
     if (dag_is_connected(d, v3, v2) == 1) {
         fprintf(stderr, "ERROR: test_connected: fail\n");
     }
+
+    dag_destroy(d, false);
 }
 
 // Based on this graph from Wikipedia:

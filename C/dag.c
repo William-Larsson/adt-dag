@@ -151,7 +151,7 @@ int dag_is_connected(struct Dag *d, struct Vertex *a, struct Vertex *b) {
 
         if (v->id == b->id) {
             free(next);
-            free(q);
+            queue_destroy(q);
             return 1;
         }
 
