@@ -25,6 +25,7 @@ list *list_create(void) {
     }
 
     l->head->next = NULL;
+    l->size = 0;
 
     return l;
 }
@@ -95,6 +96,8 @@ node *list_insert_after(list *l, node *n, void *val) {
         n->next = new_node;
     }
 
+    l->size++;
+
     return new_node;
 }
 
@@ -128,6 +131,7 @@ int list_remove_after(list *l, node *n) {
     }
     node *old_node = n->next;
     n->next = n->next->next;
+    l->size--;
      
     free(old_node);
     return 0;

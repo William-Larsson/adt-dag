@@ -3,6 +3,13 @@
 
 #include "list.h"
 
+// add and compare
+// weight interpret
+
+typedef enum WeightComp (*weight_comp_func)(void *, void *);
+typedef void* (*add_weight_func)(void *, void *);
+typedef void* (*get_weight_func)(void *);
+
 enum WeightComp {
     GREATER_THAN,
     LESS_THAN,
@@ -21,12 +28,12 @@ struct Edge {
 };
 
 struct Dag {
+    add_weight_func add;
+    weight_comp_func comp;
     struct list *v_list;
     struct list *e_list;
     int id;
 };
-
-typedef enum WeightComp (*weight_func)(void *, void*);
 
 struct Dag *dag_create(void);
 
@@ -44,6 +51,8 @@ struct Vertex *dag_add_vertex(struct Dag *d, void *w);
  */
 int dag_add_edge(struct Dag *d, struct Vertex *a, struct Vertex *b, void *w);
 
+struct Edge *dag_find_edge(struct Dag *d, struct Vertex *a, struct Vertex *b);
+
 int dag_is_connected(struct Dag *d, struct Vertex *a, struct Vertex *b);
 
 int dag_destroy(struct Dag *d, bool free_weight);
@@ -53,7 +62,7 @@ struct list *dag_get_all_paths(struct Dag *d,
 
 void *dag_weight_of_longest_path(struct Dag *d, 
                                 struct Vertex *a, struct Vertex *b,
-                                weight_func f, weight_func g);
+                                get_weight_func f, get_weight_func g);
 
 struct list *dag_topological_ordering(struct Dag *d);
 

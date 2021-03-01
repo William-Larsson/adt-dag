@@ -68,6 +68,21 @@ int dag_add_edge(struct Dag *d, struct Vertex *a, struct Vertex *b, void *w) {
     return 0;
 }
 
+struct Edge *dag_find_edge(struct Dag *d, struct Vertex *a, struct Vertex *b) {
+    struct node *n = list_first(d->e_list);
+
+    while (n != NULL) { 
+        struct Edge *e = n->value;
+        if (a->id == e->from->id && b->id == e->to->id) {
+            return e;
+        }
+
+        n = list_next(n);
+    }
+
+    return NULL;
+}
+
 /**
  * returns: 1 if connected; 0 if not connected; -1 if an error occurred.
  */
@@ -107,8 +122,45 @@ int dag_is_connected(struct Dag *d, struct Vertex *a, struct Vertex *b) {
 
 void *dag_weight_of_longest_path(struct Dag *d, 
                                 struct Vertex *a, struct Vertex *b,
-                                weight_func f, weight_func g) {
-    return NULL;
+                                get_weight_func f, get_weight_func g) {
+    struct list *all_paths = dag_get_all_paths(d, a, b);
+    struct node *n = list_first(all_paths);
+
+    void *curr_weight = NULL;
+
+    while (n != NULL) {
+        struct list *path = n->value;
+        struct node *v_it = list_first(path);
+
+        struct Vertex *from = v_it->value;
+        struct Vertex *to = list_next(v_it)->value;
+        struct Edge *e = dag_find_edge(d, from, to);
+
+        void *weight = f(from->weight);
+        weight = d->add(weight, g(e->weight));
+        
+        v_it = list_next(v_it);
+        int i = 1;
+        while (v_it != NULL) {
+            struct Vertex *v = v_it->value;
+            weight = d->add(weight, f(v->weight));
+
+            if (i < path->size - 1) {
+                struct Edge *edge = dag_find_edge(d, v, list_next(v_it)->value);
+                weight = d->add(weight, g(edge->weight));
+            }
+            
+            v_it = list_next(v_it);
+            i++;
+        }
+
+        if (curr_weight == NULL || d->comp(curr_weight, weight) == GREATER_THAN) {
+            curr_weight = weight;
+        }
+
+        n = list_next(n);
+    }
+    return curr_weight;
 }
 
 struct list *dag_topological_ordering(struct Dag *d) {

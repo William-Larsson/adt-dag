@@ -8,12 +8,14 @@ void test_connected(void);
 void test_connected_large(void);
 void test_no_cycles(void);
 void test_all_paths(void);
+void test_longest_path(void);
 
 int main(void) {
     test_no_cycles();
     test_connected();
     test_connected_large();
     test_all_paths();
+    test_longest_path();
 
     return 0;
 }
@@ -170,5 +172,63 @@ void test_all_paths(void) {
         fprintf(stdout, "\n");
 
         n = list_next(n);
+    }
+}
+
+enum WeightComp int_compare(void *a_v, void *b_v) {
+    int *a = (int*) a_v;
+    int *b = (int*) b_v;
+    if (a > b) return GREATER_THAN;
+    if (a < b) return LESS_THAN;
+    return EQUAL;
+}
+
+void *add_ints(void *a_v, void *b_v) {
+    int *a = (int*) a_v;
+    int *b = (int*) b_v;
+    int *res = malloc(sizeof(*res));
+    *res = *a + *b;
+    return res;
+}
+
+void *get_int(void *a_v) {
+    int *a = (int *) a_v;
+    return a;
+}
+
+void test_longest_path(void) {
+    struct Dag *d = dag_create();
+    d->add = add_ints;
+    d->comp = int_compare;
+
+
+    // all paths from A to C
+    // A (0) -> B (1) -> C (2) -- cost: 1 + 1 + 2 + 1 + 4 = 9
+    // A (0) -> D (3) -> C (2) -- cost: 1 + 1 + 4 + 1 + 3 = 10
+    // A (0) -> E (4) -> C (2) -- cost: 1 + 1 + 5 + 1 + 3 = 11
+    int w0 = 0, w1 = 1, w2 = 2, w3 = 3, w4 = 4, w5 = 5;
+    struct Vertex *A = dag_add_vertex(d, &w1);
+    struct Vertex *B = dag_add_vertex(d, &w2);
+    struct Vertex *C = dag_add_vertex(d, &w3);
+    struct Vertex *D = dag_add_vertex(d, &w4);
+    struct Vertex *E = dag_add_vertex(d, &w5);
+
+    int res = 0;
+    res -= dag_add_edge(d, A, B, &w1); 
+    res -= dag_add_edge(d, A, D, &w1); 
+    res -= dag_add_edge(d, A, E, &w1); 
+    res -= dag_add_edge(d, B, C, &w1); 
+    res -= dag_add_edge(d, D, C, &w1); 
+    res -= dag_add_edge(d, E, C, &w1);   
+
+    if (res != 0) {
+        fprintf(stderr, "ERROR: test_all_paths - Could not add edge\n");
+
+    }
+
+    int *weight =  dag_weight_of_longest_path(d, A, C, get_int, get_int);
+
+    if (*weight != 11) {
+        fprintf(stderr, "ERROR: test_longest_path - incorrecct weight %d\n", *weight);
     }
 }
