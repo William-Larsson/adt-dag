@@ -13,13 +13,13 @@ void test_topological_ordering(void);
 void test_small_topological_ordering(void);
 
 int main(void) {
-    //test_no_cycles();
-    //test_connected();
-    //test_connected_large();
+    // test_no_cycles();
+    // test_connected();
+    // test_connected_large();
     test_all_paths();
     // test_longest_path();
-    // test_small_topological_ordering();
-    // test_topological_ordering();
+    //test_small_topological_ordering();
+    //test_topological_ordering();
 
     return 0;
 }
@@ -172,13 +172,13 @@ void test_all_paths(void) {
             struct Vertex *v = v_it->value;
             fprintf(stdout, "%d ", v->id);
 
-            free(v_it);
+            //free(v_it);
             v_it = list_next(v_it);
         }
         fprintf(stdout, "\n");
 
-        list_destroy(path);
-        free(n);
+        //list_destroy(path);
+        //free(n);
         n = list_next(n);
     }
 

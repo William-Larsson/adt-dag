@@ -285,7 +285,7 @@ struct list *dag_get_all_paths(struct Dag *d, struct Vertex *a, struct Vertex *b
         struct list *path = p->value;
         struct Vertex *next = list_get_last(path)->value;
 
-        free(p);
+        //free(p);
 
         if (next->id == b->id) {
             // The end of a path
@@ -317,7 +317,6 @@ struct list *dag_get_all_paths(struct Dag *d, struct Vertex *a, struct Vertex *b
     }
 
     queue_destroy(queue);
-    list_destroy(first_path);
 
     return all_paths;
 }
