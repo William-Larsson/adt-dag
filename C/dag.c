@@ -68,6 +68,7 @@ struct Vertex *dag_add_vertex(struct Dag *d, void *w) {
     res->value = v;
     v->id = d->id++;
     v->weight = w;
+    v->in_count = 0;
 
     return v;
 }
@@ -273,9 +274,26 @@ struct list *dag_topological_ordering(struct Dag *d) {
                 iterator = list_first(edges);
             }
         }
+
+        struct node *e = list_first(edges);
+        while (e != NULL) {
+            list_remove_after(edges, list_first(edges));
+            e = list_first(edges);
+        }
+        list_destroy(edges);
     }
 
     list_destroy(no_incoming_edges);
+    
+    while (list_first(graph->e_list)) {
+        list_remove_after(graph->e_list, NULL);
+    } 
+    while (list_first(graph->v_list)) {
+        list_remove_after(graph->v_list, NULL);
+    }
+    list_destroy(graph->e_list);
+    list_destroy(graph->v_list);
+    free(graph);
 
     return sorted_list;
 }

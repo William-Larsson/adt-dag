@@ -13,13 +13,13 @@ void test_topological_ordering(void);
 void test_small_topological_ordering(void);
 
 int main(void) {
-    // test_no_cycles();
-    // test_connected();
-    // test_connected_large();
-    //test_all_paths();
+    test_no_cycles();
+    test_connected();
+    test_connected_large();
+    test_all_paths();
     test_longest_path();
-    //test_small_topological_ordering();
-    //test_topological_ordering();
+    test_small_topological_ordering();
+    test_topological_ordering();
 
     return 0;
 }

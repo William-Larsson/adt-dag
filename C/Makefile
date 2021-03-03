@@ -21,5 +21,5 @@ list.o: list.c list.h
 queue.o: queue.c queue.h list.o
 	$(CC) $(CFLAGS) -c $<
 
-valgrind: 
+valgrind: all
 	valgrind --leak-check=full --show-reachable=yes --track-origins=yes ./dag_test
