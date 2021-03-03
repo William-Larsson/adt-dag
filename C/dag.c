@@ -175,13 +175,15 @@ int dag_is_connected(struct Dag *d, struct Vertex *a, struct Vertex *b) {
     return 0;
 }
 
-void *dag_weight_of_longest_path(struct Dag *d, 
+void *dag_weight_of_longest_path(struct Dag *d,
                                 struct Vertex *a, struct Vertex *b,
                                 get_weight_func f, get_weight_func g) {
     struct list *all_paths = dag_get_all_paths(d, a, b);
     struct node *n = list_first(all_paths);
 
     void *curr_weight = NULL;
+    void *first = NULL;
+    void *prev;
 
     while (n != NULL) {
         struct list *path = n->value;
@@ -191,32 +193,44 @@ void *dag_weight_of_longest_path(struct Dag *d,
         struct Vertex *to = list_next(v_it)->value;
         struct Edge *e = dag_find_edge(d, from, to);
 
-        void *weight = f(from->weight);
+        void *weight = NULL;
+        weight = d->add(weight, f(from->weight));
+        prev = weight;
         weight = d->add(weight, g(e->weight));
+        free(prev);
         
         v_it = list_next(v_it);
+
         int i = 1;
         while (v_it != NULL) {
             struct Vertex *v = v_it->value;
+            prev = weight;
             weight = d->add(weight, f(v->weight));
+            free(prev);
 
             if (i < path->size - 1) {
                 struct Edge *edge = dag_find_edge(d, v, list_next(v_it)->value);
+                prev = weight;
                 weight = d->add(weight, g(edge->weight));
+                free(prev);
             }
-            
-            //free(v_it);
+        
             v_it = list_next(v_it);
             i++;
         }
 
         if (curr_weight == NULL || d->comp(curr_weight, weight) == GREATER_THAN) {
+            if (curr_weight) free(curr_weight);
             curr_weight = weight;
+        } else {
+            free(weight);
         }
-
-        //free(n);
+        
         n = list_next(n);
     }
+
+
+    dag_all_paths_list_destroy(all_paths);
 
     return curr_weight;
 }
@@ -237,12 +251,10 @@ struct list *dag_topological_ordering(struct Dag *d) {
         n = list_next(n);
     }
 
-    // TODO: Figure out why this is an infinite loop
     while(no_incoming_edges->size > 0 && list_first(no_incoming_edges)) {
         struct Vertex *f_node = list_first(no_incoming_edges)->value;
         list_insert_last(sorted_list, f_node);
-        list_remove_after(no_incoming_edges, NULL);
-        
+        list_remove_after(no_incoming_edges, NULL);        
 
         struct list *edges = dag_get_edges_from(graph, f_node);
         if (edges->size > 0) {
@@ -262,6 +274,8 @@ struct list *dag_topological_ordering(struct Dag *d) {
             }
         }
     }
+
+    list_destroy(no_incoming_edges);
 
     return sorted_list;
 }
@@ -350,7 +364,7 @@ int dag_destroy(struct Dag *d, bool free_weight) {
 
     return 0;
 }
-static void dag_destroy_path(struct list *path) {
+void dag_destroy_path(struct list *path) {
     struct node *v_it = list_first(path);
     while (v_it != NULL) {
         list_remove_after(path, NULL);
