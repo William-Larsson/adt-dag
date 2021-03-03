@@ -205,7 +205,7 @@ void *dag_weight_of_longest_path(struct Dag *d,
                 weight = d->add(weight, g(edge->weight));
             }
             
-            free(v_it);
+            //free(v_it);
             v_it = list_next(v_it);
             i++;
         }
@@ -214,7 +214,7 @@ void *dag_weight_of_longest_path(struct Dag *d,
             curr_weight = weight;
         }
 
-        free(n);
+        //free(n);
         n = list_next(n);
     }
 
@@ -266,11 +266,6 @@ struct list *dag_topological_ordering(struct Dag *d) {
     return sorted_list;
 }
 
-/**
- * Each element in the list is a list of vertices describing the path.
- * returns - a list of all paths.
- */
-//TODO: This still leaks memory.
 struct list *dag_get_all_paths(struct Dag *d, struct Vertex *a, struct Vertex *b) {
     struct list *all_paths = list_create();
 
@@ -285,10 +280,12 @@ struct list *dag_get_all_paths(struct Dag *d, struct Vertex *a, struct Vertex *b
         struct list *path = p->value;
         struct Vertex *next = list_get_last(path)->value;
 
-        //free(p);
+        free(p);
 
+        int has_path = 0;
         if (next->id == b->id) {
             // The end of a path
+            has_path = 1;
             list_insert_last(all_paths, path);
         }
 
@@ -313,6 +310,11 @@ struct list *dag_get_all_paths(struct Dag *d, struct Vertex *a, struct Vertex *b
             }
 
             n = list_next(n);
+        }
+
+        // This implies that the current path is a dead end
+        if (has_path == 0) {
+            dag_destroy_path(path);
         }
     }
 
@@ -347,4 +349,25 @@ int dag_destroy(struct Dag *d, bool free_weight) {
     free(d);
 
     return 0;
+}
+static void dag_destroy_path(struct list *path) {
+    struct node *v_it = list_first(path);
+    while (v_it != NULL) {
+        list_remove_after(path, NULL);
+        v_it = list_first(path);
+    }
+    
+    list_destroy(path);
+}
+
+void dag_all_paths_list_destroy(struct list *all_paths) {
+    struct node *n = list_first(all_paths);
+    while (n != NULL) {
+        dag_destroy_path(n->value);
+
+        list_remove_after(all_paths, NULL);
+        n = list_first(all_paths);
+    }
+
+    list_destroy(all_paths);  
 }

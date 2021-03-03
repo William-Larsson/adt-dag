@@ -17,7 +17,7 @@ int main(void) {
     // test_connected();
     // test_connected_large();
     test_all_paths();
-    // test_longest_path();
+    //test_longest_path();
     //test_small_topological_ordering();
     //test_topological_ordering();
 
@@ -172,17 +172,14 @@ void test_all_paths(void) {
             struct Vertex *v = v_it->value;
             fprintf(stdout, "%d ", v->id);
 
-            //free(v_it);
             v_it = list_next(v_it);
         }
         fprintf(stdout, "\n");
 
-        //list_destroy(path);
-        //free(n);
         n = list_next(n);
     }
 
-    list_destroy(all_paths);
+    dag_all_paths_list_destroy(all_paths);
     dag_destroy(d, false);
 }
 
@@ -209,10 +206,6 @@ void *add_ints(void *a_v, void *b_v) {
 void *get_int(void *a_v) {
     int *a = (int *) a_v;
     return a;
-}
-
-void dag_add_vertex_i(struct Dag *d, struct Vertex **a, int *w) {
-    *a = dag_add_vertex(d, &w);
 }
 
 void test_longest_path(void) {

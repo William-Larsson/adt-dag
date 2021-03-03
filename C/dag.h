@@ -68,4 +68,7 @@ void *dag_weight_of_longest_path(struct Dag *d,
 
 struct list *dag_topological_ordering(struct Dag *d);
 
+static void dag_destroy_path(struct list *path);
+void dag_all_paths_list_destroy(struct list *all_paths);
+
 #endif
