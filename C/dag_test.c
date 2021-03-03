@@ -211,6 +211,10 @@ void *get_int(void *a_v) {
     return a;
 }
 
+void dag_add_vertex_i(struct Dag *d, struct Vertex **a, int *w) {
+    *a = dag_add_vertex(d, &w);
+}
+
 void test_longest_path(void) {
     struct Dag *d = dag_create();
     d->add = add_ints;

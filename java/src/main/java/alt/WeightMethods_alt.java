@@ -2,7 +2,7 @@ package alt;
 
 import dag.WeightComparison;
 
-public interface WeightMethods<T> {
+public interface WeightMethods_alt<T> {
 
     T getVertexWeight(T w);
     T getEdgeWeight(T w);

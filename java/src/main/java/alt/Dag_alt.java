@@ -15,14 +15,14 @@ import java.util.*;
 public class Dag_alt<T> {
 
     private final List<Vertex<T>> vertices = new ArrayList<>();
-    private final WeightMethods<T> methods;
+    private final WeightMethods_alt<T> methods;
 
     // Maps a vertex to a list of all edges that exist from that vertex.
     private final Map<Vertex<T>, List<Edge<T>>> edgeMap = new HashMap<>();
     private Map<Vertex<T>, Integer> inCountMap = new HashMap<>();
     private final List<Edge<T>> allEdges = new ArrayList<>();
 
-    public Dag_alt(WeightMethods<T> methods) {
+    public Dag_alt(WeightMethods_alt<T> methods) {
         this.methods = methods;
     }
 

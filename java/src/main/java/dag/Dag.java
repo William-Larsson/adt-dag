@@ -1,5 +1,6 @@
 package dag;
 
+import alt.WeightMethods_alt;
 import exceptions.CyclicGraphException;
 
 import java.util.*;
@@ -10,16 +11,19 @@ import java.util.function.Function;
  * is parameterized and can take any type that implements the dag.Weight interface.
  * @param <T> The type of the weights.
  */
-public class Dag<T extends Weight<T>> {
+public class Dag<T> {
 
     private final List<Vertex<T>> vertices = new ArrayList<>();
+    private final WeightMethods<T> methods;
 
     // Maps a vertex to a list of all edges that exist from that vertex.
     private final Map<Vertex<T>, List<Edge<T>>> edgeMap = new HashMap<>();
     private Map<Vertex<T>, Integer> inCountMap = new HashMap<>();
     private final List<Edge<T>> allEdges = new ArrayList<>();
 
-    public Dag() {}
+    public Dag(WeightMethods<T> methods) {
+        this.methods = methods;
+    }
 
     /**
      * Makes a shallow copy of the given dag. The copy will have the same
@@ -30,6 +34,7 @@ public class Dag<T extends Weight<T>> {
      * @param dag The dag to make a shallow copy of.
      */
     public Dag(Dag<T> dag) {
+        this.methods = dag.methods;
         this.vertices.addAll(dag.vertices);
         this.edgeMap.putAll(dag.edgeMap);
         for (Vertex<T> key : dag.inCountMap.keySet()) {
@@ -222,21 +227,21 @@ public class Dag<T extends Weight<T>> {
         for (List<Vertex<T>> path : allPaths) {
 
             T weight = f.apply(path.get(0).getWeight());
-            weight = weight.add(g.apply(findEdge(path.get(0), path.get(1))
+            weight = methods.add(weight, g.apply(findEdge(path.get(0), path.get(1))
                                         .getWeight()));
 
             for (int i = 1; i < path.size(); i++) {
                 Vertex<T> v = path.get(i);
-                weight = weight.add(f.apply(v.getWeight()));
+                weight = methods.add(weight, f.apply(v.getWeight()));
                 // Find weight from current node to next node.
                 if (i < path.size() - 1) {
                     Edge<T> edge = findEdge(v, path.get(i+1));
-                    weight = weight.add(g.apply(edge.getWeight()));
+                    weight = methods.add(weight, g.apply(edge.getWeight()));
                 }
             }
 
             // If currWeight `compare` weight,  replace the current weight
-            if (currWeight == null || weight.compare(currWeight) == comp) {
+            if (currWeight == null || methods.compare(weight, currWeight) == comp) {
                 currWeight = weight;
             }
         }
