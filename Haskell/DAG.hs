@@ -110,7 +110,7 @@ module DAG (
         -> (w -> w) -> (w -> w) -> Maybe w
     weightOfShortestPath graph s e f g = weightOfPathComp graph s e f g minimumBy
 
-    -- Function: weightOfLongestPath 
+    -- Function: weightOfPathComp 
     --
     -- Computes the weight of the longest path between the vertices 
     -- s (start) and e (end).
