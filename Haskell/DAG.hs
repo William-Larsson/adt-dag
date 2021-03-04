@@ -19,23 +19,25 @@ module DAG (
 
     import qualified Graph as G
     import qualified Weight as W
-    import Data.List ( delete, find ) 
+    import Data.List ( delete, find, maximumBy , minimumBy ) 
     import Data.Maybe ( isJust, fromJust )
 
     -- Function: addEdge
     --
     -- Adds edge to graph if no cycle is introduced and 
-    -- the start of the edge exist as a vertex in graph. 
+    -- the start of the edge exist as vertices in the graph. 
     addEdge :: W.Weight w => G.Graph w -> G.Edge w -> G.Graph w
-    addEdge (G.Graph vs es) ed@(ids,ide,_)
+    addEdge (G.Graph vs es) ed@(idStart,idEnd,_)
         | not startExists = error noStart
         | not endExists   = error noEnd
         | isJust topOrd   = newGraph
         | otherwise       = error hasCycle
         where
-            (startExists, endExists) = foldl 
-                (\(srt, end) (idv,_) -> (srt || idv == ids, end || idv == ide)) 
-                (False, False) vs
+            (startExists, endExists) = 
+                foldl 
+                    (\(srt, end) (idv,_) -> 
+                        (srt || idv == idStart, end || idv == idEnd)) 
+                    (False, False) vs
             newGraph = G.Graph vs (ed:es)
             topOrd   = topologicalOrdering newGraph 
             noStart  = "Cannot add edge - start vertex does not exist."
@@ -52,11 +54,12 @@ module DAG (
     --
     -- Removes all given edges from a list if edges.
     -- Uses removeEdge as helper function.
+    -- Input: [Edges that will be removed], [Edges to remove from]
     removeEdges :: W.Weight w => [G.Edge w] -> [G.Edge w] -> [G.Edge w]
-    removeEdges _ []      = []
-    removeEdges [] ex     = ex
-    removeEdges (e:es) ex = removeEdges es (removeEdge e ex)
- 
+    removeEdges _ []  = []
+    removeEdges [] ed = ed
+    removeEdges rm ed = removeEdges (tail rm) $ removeEdge (head rm) ed
+
     -- Function: topologicalOrdering
     --
     -- Performs top. ord, based on Kahn's algorithm. 
@@ -65,43 +68,47 @@ module DAG (
     -- the the function returns Nothing. 
     -- Uses filterEdgesFromVertex as helper function. 
     topologicalOrdering :: W.Weight w => G.Graph w -> Maybe [G.VertexID]
-    topologicalOrdering g = 
+    topologicalOrdering graph = 
         let
-            l = []
-            s = noIncomingEdges g
+            ordering   = []
+            noIncoming = noIncomingEdges graph 
 
             topOrd :: W.Weight w => G.Graph w -> [(G.Vertex w, Bool)] 
                 -> [G.VertexID] -> Maybe [G.VertexID] 
-            topOrd (G.Graph _ es) [] l 
-                | null es   = Just (reverse l)
+            topOrd (G.Graph _ es) [] ord 
+                | null es   = Just (reverse ord)
                 | otherwise = Nothing       
 
-            topOrd (G.Graph vs es) ((v@(id,_),_):s) l = result
+            topOrd (G.Graph vs es) ((v@(id,_),_):_) ord = result
                 where
-                    l'     = id:l 
-                    e'     = filterEdgesFromVertex id es  
-                    g'     = G.Graph (delete v vs) (removeEdges e' es) 
-                    s'     = noIncomingEdges g' 
-                    result = topOrd g' s' l' 
-        in topOrd g s l 
+                    ord'   = id:ord 
+                    edges  = filterEdgesFromVertex id es  
+                    graph  = G.Graph (delete v vs) (removeEdges edges es) 
+                    noIn   = noIncomingEdges graph 
+                    result = topOrd graph noIn ord' 
+        in topOrd graph noIncoming ordering 
 
     -- Function: weightOfLongestPath
     --
-    -- Computes the longest path between two given vertices s and e. 
+    -- Computes the longest path between two given vertices s and e
+    -- representing the starting and ending vertices.
+    -- Inputs includes two functions, f and g, which are used to 
+    -- interpret the weight of the vertices and edges respectively.  
     -- Uses weightOfPathComb as helper function. 
     weightOfLongestPath :: W.Weight w => G.Graph w -> G.VertexID -> G.VertexID
         -> (w -> w) -> (w -> w) -> Maybe w
-    weightOfLongestPath graph s e f g = weightOfPathComp graph s e f g maximum
+    weightOfLongestPath graph s e f g = weightOfPathComp graph s e f g maximumBy
 
     -- Function: weightOfShortestPath
     --
-    -- Computes the shortest path between two given vertices s and e. 
+    -- Computes the shortest path between two given vertices s and e
+    -- representing the starting and ending vertices. 
     -- Inputs includes two functions, f and g, which are used to 
     -- interpret the weight of the vertices and edges respectively. 
     -- Uses weightOfPathComb as helper function. 
     weightOfShortestPath :: W.Weight w => G.Graph w -> G.VertexID -> G.VertexID
         -> (w -> w) -> (w -> w) -> Maybe w
-    weightOfShortestPath graph s e f g = weightOfPathComp graph s e f g minimum
+    weightOfShortestPath graph s e f g = weightOfPathComp graph s e f g minimumBy
 
     -- Function: weightOfLongestPath 
     --
@@ -111,10 +118,12 @@ module DAG (
     -- Input function g is used to interpret the weight on an edge. 
     -- Input function comp used to get longest/shortest path. 
     -- Uses getAdjacentVertices, filterEdgesFromVertex, getAllPaths
-    -- getPathInfo and calcPathWeight as helper functions. 
+    -- getPathInfo, calcPathWeight & W.compare as helper functions. 
     weightOfPathComp :: W.Weight w => G.Graph w -> Integer -> Integer 
-        -> (w -> w) -> (w -> w) -> ([Maybe w] -> Maybe w) -> Maybe w
-    weightOfPathComp graph@(G.Graph _ es) start end f g comp = maxWeight
+        -> (w -> w) -> (w -> w) -> 
+        ((Maybe w -> Maybe w -> Ordering) -> [Maybe w] -> Maybe w) 
+        -> Maybe w
+    weightOfPathComp graph@(G.Graph _ es) start end f g compFunc = maxWeight
         where 
             startAdj    = getAdjacentVertices $ filterEdgesFromVertex start es  
             allPaths    = getAllPaths graph start end startAdj [start]
@@ -122,11 +131,11 @@ module DAG (
             pathWeights = map (\l -> calcPathWeight l f g) pathsInfo
             maxWeight
                 | null pathWeights = Nothing
-                | otherwise        = comp pathWeights
+                | otherwise        = compFunc W.compare pathWeights
 
     -- Function: noIncomingEdges
     --
-    -- Filters out all vertices that has 0 incoming edges
+    -- Filters out all vertices that has 0 incoming edges.
     noIncomingEdges :: G.Graph w -> [(G.Vertex w, Bool)]
     noIncomingEdges (G.Graph vs es) = result
         where
@@ -135,7 +144,7 @@ module DAG (
 
     -- Function: getAdjacentVertices
     --
-    -- Get id of vertices that are at the end of
+    -- Get id of the vertices that are at the end of
     -- each given edge. 
     getAdjacentVertices :: [G.Edge w] -> [G.VertexID]
     getAdjacentVertices []             = []
@@ -168,7 +177,7 @@ module DAG (
     -- Function: getPathInfo 
     --
     -- Retrieves all the information about a Vertex 
-    -- (ID, weights, and Edge connecting to next vertex.
+    -- (ID, weights, and Edge connecting to next vertex)
     getPathInfo :: W.Weight w => G.Graph w -> [G.VertexID] 
         -> [(G.Vertex w, Maybe (G.Edge w))]
     getPathInfo _ []  = []
@@ -185,19 +194,24 @@ module DAG (
 
     -- Function: calcPathWeight
     --
-    -- Takes tuples of a Vertex and an Edge that leads
-    -- to the next Vertex on a given path through tge DAG.  
+    -- Calculates the weight of the a Vertex and the next edge 
+    -- along the given path, unless its the last vertex on the path.
+    -- Then sums up all weights in a path and returns list of 
+    -- all path weights.  
+    -- Uses the f function to interpret a vertex weight.
+    -- Uses the g function to interpret a edge weight. 
+    -- Uses W.add as a helper function. 
     calcPathWeight :: W.Weight w => [(G.Vertex w, Maybe (G.Edge w))] -> 
         (w -> w) -> (w -> w) -> Maybe w
-    calcPathWeight [] _ _                  = Nothing
-    calcPathWeight [((_,vw), Nothing)] f _ = Just (f vw)
+    calcPathWeight [] _ _ = Nothing
 
-    calcPathWeight (((_,vw), Just (_,_,ew)):ps) f g 
-        | isJust recur = Just $ W.add sum (fromJust recur)
-        | otherwise    = Just sum
+    calcPathWeight [((_,vertWeight), Nothing)] f _ = Just (f vertWeight)
+
+    calcPathWeight (((_,vertWeight), Just (_,_,edgeWeight)):paths) f g = 
+        Just $ W.add sum (fromJust recur)
         where 
-            sum   = W.add (f vw) (g ew)
-            recur = calcPathWeight ps f g
+            sum   = W.add (f vertWeight) (g edgeWeight)
+            recur = calcPathWeight paths f g
 
     -- Function: filterEdgesFromVertex
     --
