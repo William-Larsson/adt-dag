@@ -51,7 +51,7 @@ module DAG_Tests where
 
     -- Same as g, but with an added cycle through manual 
     -- manipulation of edge array. 
-    gWithCycle = Graph (vertices g) ((1,2,1):edges g)
+    gWithCycle = Graph (vertices g) ((2,5,1):edges g)
 
     -- Vertices for testing Char
     (idc1, gc1) = addVertex initGraph 'a'
@@ -121,19 +121,28 @@ module DAG_Tests where
 
     addCharTest :: Char
     addCharTest    = DAG.add '0' '1'
+
+    addStringTest :: String
+    addStringTest    = DAG.add "My" "String"
     
     -- Tests for asserting Weight type class comparison
     compareIntTest :: Ordering
-    compareIntTest     = DAG.compare (1::Int) (2::Int)
+    compareIntTest     = DAG.compare (Just 1::Maybe Int) (Just 2::Maybe Int)
 
     compareIntegerTest :: Ordering
-    compareIntegerTest = DAG.compare (2::Integer) (2::Integer)
+    compareIntegerTest = DAG.compare (Just 2::Maybe Integer) (Just 2::Maybe Integer)
 
     compareFloatTest :: Ordering
-    compareFloatTest   = DAG.compare (2::Float) (1::Float)
+    compareFloatTest   = DAG.compare (Just 2::Maybe Float) (Just 1::Maybe Float)
 
     compareDoubleTest :: Ordering
-    compareDoubleTest  = DAG.compare (1::Double) (2::Double)
+    compareDoubleTest  = DAG.compare (Just 1::Maybe Double) (Just 2::Maybe Double)
 
     compareCharTest :: Ordering
-    compareCharTest    = DAG.compare ('a'::Char) ('b'::Char)
+    compareCharTest    = DAG.compare (Just 'a'::Maybe Char) (Just 'b'::Maybe Char)
+
+    compareStringTest :: Ordering
+    compareStringTest   = DAG.compare (Just "abc"::Maybe String) (Just "aaa"::Maybe String)
+
+    compareStringEqTest :: Ordering 
+    compareStringEqTest = DAG.compare (Just "abc"::Maybe String) (Just "cba"::Maybe String)
