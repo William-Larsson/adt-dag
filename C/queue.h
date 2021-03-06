@@ -8,7 +8,7 @@ struct Queue {
     struct node *last;
 };
 
-struct Queue *queue_create();
+struct Queue *queue_create(void);
 
 /**
  * adds an element to the end of the queue.

@@ -7,7 +7,7 @@
 
 struct node;
 
-struct Queue *queue_create() {
+struct Queue *queue_create(void) {
     struct Queue *q = malloc(sizeof(*q));
     if (q == NULL) {
         return NULL;
@@ -78,4 +78,6 @@ int queue_destroy(struct Queue *q) {
     }
 
     free(q);
+
+    return 0;
 }
