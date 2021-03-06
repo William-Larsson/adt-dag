@@ -20,7 +20,6 @@ int main(void) {
     test_longest_path();
     test_small_topological_ordering();
     test_topological_ordering();
-
     return 0;
 }
 

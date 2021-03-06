@@ -73,7 +73,7 @@ struct Vertex *dag_add_vertex(struct Dag *d, void *w) {
     return v;
 }
 int dag_add_edge(struct Dag *d, struct Vertex *a, struct Vertex *b, void *w) {
-    // this would lead to a cycle
+    // This would lead to a cycle, which is not allowed in a DAG!
     if (dag_is_connected(d, b, a) == 1) {
         return -1;
     }
@@ -236,6 +236,12 @@ void *dag_weight_of_longest_path(struct Dag *d,
     return curr_weight;
 }
 
+    /**
+     * Performs a topological ordering, using Kahn's algorithm.
+     * dag - graph containing the vertices to sort.
+     * return - A list containing the sorted elements. This list must be 
+     *          freed by calling dag_destroy_path() to avoid memory leaks.
+     */
 struct list *dag_topological_ordering(struct Dag *d) {
     struct Dag *graph = dag_clone(d);
 
@@ -298,6 +304,14 @@ struct list *dag_topological_ordering(struct Dag *d) {
     return sorted_list;
 }
 
+/**
+ * Traverses the graph and creates a list of paths between the vertices 
+ * that is then returned.
+ * a - Starting vertex
+ * b - Goal vertex
+ * return - The path between a and b. This list must be destroy with
+ *          dag_all_paths_list_destroy()
+ */
 struct list *dag_get_all_paths(struct Dag *d, struct Vertex *a, struct Vertex *b) {
     struct list *all_paths = list_create();
 
