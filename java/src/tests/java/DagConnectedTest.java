@@ -26,7 +26,7 @@ public class DagConnectedTest {
     static class StrWeightI implements WeightMethods<String> {
         @Override
         public String add(String a, String b) {
-            return new String(a.concat(b));
+            return a.concat(b);
         }
 
         /**
@@ -127,7 +127,6 @@ public class DagConnectedTest {
         Vertex<Integer> a = dag.addVertex((1));
         Vertex<Integer> b = dag.addVertex((2));
         Vertex<Integer> c = dag.addVertex((3));
-        Vertex<Integer> d = dag.addVertex((3));
 
         dag.addEdge(a, b, (2));
         dag.addEdge(b, c, (3));
