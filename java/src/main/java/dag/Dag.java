@@ -18,7 +18,7 @@ public class Dag<T> {
 
     // Maps a vertex to a list of all edges that exist from that vertex.
     private final Map<Vertex<T>, List<Edge<T>>> edgeMap = new HashMap<>();
-    private Map<Vertex<T>, Integer> inCountMap = new HashMap<>();
+    private final Map<Vertex<T>, Integer> inCountMap = new HashMap<>();
     private final List<Edge<T>> allEdges = new ArrayList<>();
 
     public Dag(WeightMethods<T> methods) {
@@ -38,7 +38,7 @@ public class Dag<T> {
         this.vertices.addAll(dag.vertices);
         this.edgeMap.putAll(dag.edgeMap);
         for (Vertex<T> key : dag.inCountMap.keySet()) {
-            this.inCountMap.put(key, inCountMap.get(key));
+            this.inCountMap.put(key, dag.inCountMap.get(key));
         }
     }
 
@@ -114,6 +114,8 @@ public class Dag<T> {
         int c = getInCount(a);
         if (c > 0)
             inCountMap.put(a, c-1);
+        else
+            inCountMap.put(a, 0);
     }
 
     /**

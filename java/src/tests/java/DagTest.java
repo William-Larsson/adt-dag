@@ -6,7 +6,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DagConnectedTest {
+public class DagTest {
 
     static class IntWeightI implements WeightMethods<Integer> {
         @Override
@@ -115,6 +115,38 @@ public class DagConnectedTest {
 
         int[] correct = {1,2,5,3,4,6,7};
         List<Vertex<Integer>> sorted = dag.topologicalOrdering();
+        for (int i = 0; i < correct.length; i++) {
+            assertEquals(correct[i], sorted.get(i).getWeight());
+        }
+    }
+
+    @Test
+    public void topologicalOrderingMultiplePaths() {
+        Dag<Integer> dag = new Dag<>(new IntWeightI());
+
+        Vertex<Integer> a = dag.addVertex((0));
+        Vertex<Integer> b = dag.addVertex((1));
+        Vertex<Integer> c = dag.addVertex((2));
+        Vertex<Integer> d = dag.addVertex((3));
+        Vertex<Integer> e = dag.addVertex((4));
+        Vertex<Integer> f = dag.addVertex((5));
+        Vertex<Integer> g = dag.addVertex((6));
+        Vertex<Integer> h = dag.addVertex((7));
+
+        dag.addEdge(a, b, (1));
+        dag.addEdge(a, d, (2));
+        dag.addEdge(b, c, (2));
+        dag.addEdge(b, d, (5));
+        dag.addEdge(b, e, (6));
+        dag.addEdge(c, e, (3));
+        dag.addEdge(c, h, (2));
+        dag.addEdge(d, e, (7));
+        dag.addEdge(e, f, (8));
+        dag.addEdge(e, g, (4));
+
+        int[] correct = {0, 1, 2, 3, 7, 4, 5, 6};
+        List<Vertex<Integer>> sorted = dag.topologicalOrdering();
+        assertEquals(8, sorted.size());
         for (int i = 0; i < correct.length; i++) {
             assertEquals(correct[i], sorted.get(i).getWeight());
         }
