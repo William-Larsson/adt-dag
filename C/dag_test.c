@@ -9,6 +9,7 @@ void test_connected_large(void);
 void test_no_cycles(void);
 void test_all_paths(void);
 void test_longest_path(void);
+void test_longest_path_large(void);
 void test_topological_ordering(void);
 void test_small_topological_ordering(void);
 
@@ -18,45 +19,54 @@ int main(void) {
     test_connected_large();
     test_all_paths();
     test_longest_path();
+    test_longest_path_large();
     test_small_topological_ordering();
     test_topological_ordering();
+    
     return 0;
 }
 
 void test_connected(void) {
     struct Dag *d = dag_create();
 
-    int w1 = 1, w2 = 2, w3 = 3;
+    int w1 = 5, w2 = 10, w3 = 15, w4 = 20;
 
-    struct Vertex *v1 = dag_add_vertex(d, &w1);
-    struct Vertex *v2 = dag_add_vertex(d, &w2);
-    struct Vertex *v3 = dag_add_vertex(d, &w3);
+    struct Vertex *A = dag_add_vertex(d, &w1);
+    struct Vertex *B = dag_add_vertex(d, &w2);
+    struct Vertex *C = dag_add_vertex(d, &w3);
+    struct Vertex *D = dag_add_vertex(d, &w4);
 
-    int res = dag_add_edge(d, v1, v2, &w1); 
-    res -= dag_add_edge(d, v2, v3, &w1); 
-    res -= dag_add_edge(d, v1, v3, &w1); 
+    int res = dag_add_edge(d, A, B, &w1); 
+    res -= dag_add_edge(d, A, C, &w2); 
+    res -= dag_add_edge(d, B, D, &w2); 
 
     if (res < 0) {
         fprintf(stderr, "ERROR: test_connected: fail to add edge\n");
     }
 
-    if (dag_is_connected(d, v1, v2) < 0) {
+    if (dag_is_connected(d, A, B) < 0) {
         fprintf(stderr, "ERROR: test_connected: fail\n");
     } 
-    if (dag_is_connected(d, v2, v3) < 0) {
+    if (dag_is_connected(d, A, C) < 0) {
         fprintf(stderr, "ERROR: test_connected: fail\n");
     }
-    if (dag_is_connected(d, v1, v3) < 0) {
+    if (dag_is_connected(d, A, D) < 0) {
+        fprintf(stderr, "ERROR: test_connected: fail\n");
+    }
+    if (dag_is_connected(d, B, D) < 0) {
         fprintf(stderr, "ERROR: test_connected: fail\n");
     }
 
-    if (dag_is_connected(d, v2, v1) == 1) {
+    if (dag_is_connected(d, B, A) == 1) {
         fprintf(stderr, "ERROR: test_connected: fail\n");
     }
-    if (dag_is_connected(d, v3, v1) == 1) {
+    if (dag_is_connected(d, C, A) == 1) {
         fprintf(stderr, "ERROR: test_connected: fail\n");
     }
-    if (dag_is_connected(d, v3, v2) == 1) {
+    if (dag_is_connected(d, D, B) == 1) {
+        fprintf(stderr, "ERROR: test_connected: fail\n");
+    }
+    if (dag_is_connected(d, B, C) == 1) {
         fprintf(stderr, "ERROR: test_connected: fail\n");
     }
 
@@ -189,8 +199,9 @@ void *get_int(void *a_v);
 enum WeightComp int_compare(void *a_v, void *b_v) {
     int *a = (int *) a_v;
     int *b = (int *) b_v;
-    if (a > b) return GREATER_THAN;
-    if (a < b) return LESS_THAN;
+    if (*a > *b) return GREATER_THAN;
+    if (*a < *b) return LESS_THAN;
+
     return EQUAL;
 }
 
@@ -250,6 +261,47 @@ void test_longest_path(void) {
 
     free(weight);
     dag_destroy(d, false);
+}
+
+void test_longest_path_large(void) {
+    struct Dag *d = dag_create();
+    d->add = add_ints;
+    d->comp = int_compare;
+
+    int vw[] = {1, 2, 2, 6, 5, 15, 20, 25};
+    struct Vertex *A = dag_add_vertex(d, &vw[0]);
+    struct Vertex *B = dag_add_vertex(d, &vw[1]);
+    struct Vertex *C = dag_add_vertex(d, &vw[2]);
+    struct Vertex *D = dag_add_vertex(d, &vw[3]);
+    struct Vertex *E = dag_add_vertex(d, &vw[4]);
+    struct Vertex *F = dag_add_vertex(d, &vw[5]);
+    struct Vertex *G = dag_add_vertex(d, &vw[6]);
+    struct Vertex *H = dag_add_vertex(d, &vw[7]);
+
+    int ew[] = {1, 2, 2, 5, 6, 3, 2, 7, 8, 4};
+    int res = dag_add_edge(d, A, B, &ew[0]); 
+    res -= dag_add_edge(d, A, D, &ew[1]); 
+    res -= dag_add_edge(d, B, C, &ew[2]); 
+    res -= dag_add_edge(d, B, D, &ew[3]); 
+    res -= dag_add_edge(d, B, E, &ew[4]); 
+    res -= dag_add_edge(d, C, E, &ew[5]); 
+    res -= dag_add_edge(d, C, H, &ew[6]); 
+    res -= dag_add_edge(d, D, E, &ew[7]); 
+    res -= dag_add_edge(d, E, F, &ew[8]); 
+    res -= dag_add_edge(d, E, G, &ew[9]); 
+
+//      These are all the paths from a to g
+//        a -> d -> e -> g (weight 1 + 2 + 6 + 7 + 5 + 4 + 20 = 45)
+//        a -> b -> d -> e -> g (weight 1 + 1 + 2 + 5 + 6 + 7 + 5 + 4 + 20 = 51)
+//        a -> b -> e -> g (weight 1 + 1 + 2 + 6 + 5 + 4 + 20 = 39)
+//        a -> b -> c -> e -> g (weight 1 + 1 + 2 + 1 + 2 + 3 + 5 + 4 + 20 = 39)
+    int *longPath = dag_weight_of_longest_path(d, A, G, get_int, get_int);
+
+    if (*longPath != 51) 
+        fprintf(stderr, "ERROR: test_longest_path_large: invalid longest path: %d\n", *longPath);
+        
+    dag_destroy(d, false);
+    free(longPath);
 }
 
 void test_small_topological_ordering(void) {
