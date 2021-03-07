@@ -4,10 +4,16 @@ RM = rm -f
 INC := -I ./
 CFLAGS += $(INC)
 
-all: dag_test
+all: dag_test dag_mwe
 
 dag_test: dag_test.c dag.o list.o queue.o
 	$(CC) $(CFLAGS) $^ -o $@
+
+dag_mwe: dag_mwe.o dag.o list.o queue.o
+	$(CC) $(CFLAGS) $^ -o $@
+
+dag_mwe.o: dag_mwe.c
+	$(CC) $(CFLAGS) -c $<
 
 dag: dag.o list.o queue.o
 	$(CC) $(CFLAGS) $^ -o $@
