@@ -148,8 +148,7 @@ public class DagTest {
         List<Vertex<Integer>> sorted = dag.topologicalOrdering();
         assertEquals(8, sorted.size());
         for (int i = 0; i < correct.length; i++) {
-            System.out.println(sorted.get(i).getWeight());
-            //assertEquals(correct[i], sorted.get(i).getWeight());
+            assertEquals(correct[i], sorted.get(i).getWeight());
         }
     }
 
