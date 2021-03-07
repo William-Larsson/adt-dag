@@ -13,14 +13,13 @@ void test_topological_ordering(void);
 void test_small_topological_ordering(void);
 
 int main(void) {
-    // test_no_cycles();
-    // test_connected();
-    // test_connected_large();
+    test_no_cycles();
+    test_connected();
+    test_connected_large();
     test_all_paths();
-    // test_longest_path();
-    //test_small_topological_ordering();
-    //test_topological_ordering();
-
+    test_longest_path();
+    test_small_topological_ordering();
+    test_topological_ordering();
     return 0;
 }
 
@@ -172,17 +171,14 @@ void test_all_paths(void) {
             struct Vertex *v = v_it->value;
             fprintf(stdout, "%d ", v->id);
 
-            //free(v_it);
             v_it = list_next(v_it);
         }
         fprintf(stdout, "\n");
 
-        //list_destroy(path);
-        //free(n);
         n = list_next(n);
     }
 
-    list_destroy(all_paths);
+    dag_all_paths_list_destroy(all_paths);
     dag_destroy(d, false);
 }
 
@@ -191,28 +187,29 @@ void *add_ints(void *a_v, void *b_v);
 void *get_int(void *a_v);
 
 enum WeightComp int_compare(void *a_v, void *b_v) {
-    int *a = (int*) a_v;
-    int *b = (int*) b_v;
+    int *a = (int *) a_v;
+    int *b = (int *) b_v;
     if (a > b) return GREATER_THAN;
     if (a < b) return LESS_THAN;
     return EQUAL;
 }
 
 void *add_ints(void *a_v, void *b_v) {
-    int *a = (int*) a_v;
-    int *b = (int*) b_v;
+    int a;
+    if (a_v == NULL)
+        a = 0;
+    else 
+        a = *(int*) a_v;
+
+    int b = *(int*) b_v;
     int *res = malloc(sizeof(*res));
-    *res = *a + *b;
+    *res = a + b;
     return res;
 }
 
 void *get_int(void *a_v) {
     int *a = (int *) a_v;
     return a;
-}
-
-void dag_add_vertex_i(struct Dag *d, struct Vertex **a, int *w) {
-    *a = dag_add_vertex(d, &w);
 }
 
 void test_longest_path(void) {
@@ -245,11 +242,14 @@ void test_longest_path(void) {
 
     }
 
-    int *weight =  dag_weight_of_longest_path(d, A, C, get_int, get_int);
+    int *weight = dag_weight_of_longest_path(d, A, C, get_int, get_int);
 
     if (*weight != 11) {
-        fprintf(stderr, "ERROR: test_longest_path - incorrecct weight %d\n", *weight);
+        fprintf(stderr, "ERROR: test_longest_path - incorrect weight %d\n", *weight);
     }
+
+    free(weight);
+    dag_destroy(d, false);
 }
 
 void test_small_topological_ordering(void) {
@@ -278,6 +278,9 @@ void test_small_topological_ordering(void) {
     }   
 
     fprintf(stdout, "\n");
+
+    dag_destroy(d, false);
+    dag_destroy_path(l);
 }
 
 void test_topological_ordering(void) {
@@ -310,5 +313,9 @@ void test_topological_ordering(void) {
 
         it = list_next(it);
     }
+
     fprintf(stdout, "\n");
+
+    dag_destroy_path(l);
+    dag_destroy(d, false);
 }

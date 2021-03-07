@@ -62,10 +62,13 @@ int dag_destroy(struct Dag *d, bool free_weight);
 struct list *dag_get_all_paths(struct Dag *d, 
                                struct Vertex *a, struct Vertex *b);
 
-void *dag_weight_of_longest_path(struct Dag *d, 
+void *dag_weight_of_longest_path(struct Dag *d,
                                 struct Vertex *a, struct Vertex *b,
                                 get_weight_func f, get_weight_func g);
 
 struct list *dag_topological_ordering(struct Dag *d);
+
+void dag_destroy_path(struct list *path);
+void dag_all_paths_list_destroy(struct list *all_paths);
 
 #endif
