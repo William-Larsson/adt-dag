@@ -6,6 +6,8 @@
 #include "list.h"
 #include "dag.h"
 
+static struct list *dag_get_edges_from(struct Dag *d, struct Vertex *a);
+
 /**
  * Creates a new dag.
  * return - the new dag on success; null on error.
@@ -150,7 +152,7 @@ struct Edge *dag_find_edge(struct Dag *d, struct Vertex *a, struct Vertex *b) {
  * a - vertex to get all edges from.
  * return - a list containing all edges from a; null if there are no such edges.
  */
-struct list *dag_get_edges_from(struct Dag *d, struct Vertex *a) {
+static struct list *dag_get_edges_from(struct Dag *d, struct Vertex *a) {
     struct list *res = list_create();
     struct node *e_it = list_first(d->e_list);
 
@@ -264,7 +266,7 @@ void *dag_weight_of_longest_path(struct Dag *d,
             i++;
         }
 
-        if (curr_weight == NULL || d->comp(curr_weight, weight) == GREATER_THAN) {
+        if (curr_weight == NULL || d->comp(weight, curr_weight) == GREATER_THAN) {
             if (curr_weight) free(curr_weight);
             curr_weight = weight;
         } else {

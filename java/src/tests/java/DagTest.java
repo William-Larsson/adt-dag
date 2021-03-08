@@ -86,9 +86,9 @@ public class DagTest {
         Vertex<Integer> c = dag.addVertex(3);
         Vertex<Integer> d = dag.addVertex(4);
 
-        dag.addEdge(a, b,0);
-        dag.addEdge(a, c,  0);
-        dag.addEdge(b, d,  0);
+        dag.addEdge(a, b, 0);
+        dag.addEdge(a, c, 0);
+        dag.addEdge(b, d, 0);
 
         List<Vertex<Integer>> sorted = dag.topologicalOrdering();
         for (int i = 0; i < sorted.size(); i++)
