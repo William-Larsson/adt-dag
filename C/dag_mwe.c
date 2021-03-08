@@ -6,7 +6,7 @@
 
 
 int main(void) {
-    struct Dag *d = dag_create();
+    struct Dag *d = dag_create(NULL, NULL);
 
     int w1 = 1, w2 = 2, w3 = 3;
 

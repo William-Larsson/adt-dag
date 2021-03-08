@@ -6,14 +6,37 @@
 #include "list.h"
 #include "dag.h"
 
+struct Vertex {
+    int id;
+    int in_count;
+    void *weight;
+};
+
+struct Edge {
+    struct Vertex *from;
+    struct Vertex *to;
+    void *weight;
+};
+
+struct Dag {
+    add_weight_func add;
+    weight_comp_func comp;
+    struct list *v_list;
+    struct list *e_list;
+    int id;
+};
+
 static struct list *dag_get_edges_from(struct Dag *d, struct Vertex *a);
 
 /**
  * Creates a new dag.
  * return - the new dag on success; null on error.
  */
-struct Dag *dag_create(void) {
+struct Dag *dag_create(add_weight_func add_func, weight_comp_func comp_func) {
     struct Dag *d = malloc(sizeof(*d));
+    d->add = add_func;
+    d->comp = comp_func;
+
     if (!d) {
         return NULL;
     }
@@ -37,10 +60,8 @@ struct Dag *dag_create(void) {
  * return - a clone of d, must be manually freed later.
  */
 struct Dag *dag_clone(struct Dag *d) {
-    struct Dag *clone = dag_create();
+    struct Dag *clone = dag_create(d->add, d->comp);
     clone->id = d->id;
-    clone->add = d->add;
-    clone->comp = d->comp;
 
     node *v_it = list_first(d->v_list);
     while(v_it != NULL) {
@@ -119,6 +140,22 @@ int dag_add_edge(struct Dag *d, struct Vertex *a, struct Vertex *b, void *w) {
     b->in_count++;
 
     return 0;
+}
+
+/**
+ * Gets the weight of the given vertex.
+ * returns - the weight of the given vertex.
+ */
+void *dag_v_get_weight(struct Vertex *v) {
+    return v->weight;
+}
+
+/**
+ * Gets the ID of the given vertex
+ * returns - the ID of the given vertex.
+ */
+int dag_v_get_id(struct Vertex *v) {
+    return v->id;
 }
 
 /**
@@ -221,11 +258,13 @@ int dag_is_connected(struct Dag *d, struct Vertex *a, struct Vertex *b) {
  * b - Path end
  * f - function for interpreting the weight of the vertices
  * g - function for interpreting the weight of the edges.
- * return - the weight of the longest path between a and b.
+ * return - the weight of the longest path between a and b. NULL is returned if 
+ * f or g are NULL, or if `add` and `compare` functions are not defined.
  */
 void *dag_weight_of_longest_path(struct Dag *d,
                                 struct Vertex *a, struct Vertex *b,
                                 get_weight_func f, get_weight_func g) {
+    if (!f || !g || !d->add || !d->comp) return NULL;
     struct list *all_paths = dag_get_all_paths(d, a, b);
     struct node *n = list_first(all_paths);
 

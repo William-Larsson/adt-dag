@@ -28,7 +28,7 @@ int main(void) {
 }
 
 void test_connected(void) {
-    struct Dag *d = dag_create();
+    struct Dag *d = dag_create(NULL, NULL);
 
     int w1 = 5, w2 = 10, w3 = 15, w4 = 20;
 
@@ -77,7 +77,7 @@ void test_connected(void) {
 // Based on this graph from Wikipedia:
 // https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Polytree.svg/768px-Polytree.svg.png
 void test_connected_large(void) {
-    struct Dag *d = dag_create();
+    struct Dag *d = dag_create(NULL, NULL);
 
     int w1 = 1, w2 = 2, w3 = 3;
 
@@ -127,7 +127,7 @@ void test_connected_large(void) {
 }
 
 void test_no_cycles(void) {
-    struct Dag *d = dag_create();
+    struct Dag *d = dag_create(NULL, NULL);
 
     int w1 = 1, w2 = 2;
 
@@ -145,7 +145,7 @@ void test_no_cycles(void) {
 }
 
 void test_all_paths(void) {
-     struct Dag *d = dag_create();
+     struct Dag *d = dag_create(NULL, NULL);
 
     // all paths from A to C
     // A (0) -> B (1) -> C (2)
@@ -180,7 +180,7 @@ void test_all_paths(void) {
         struct node *v_it = list_first(path);
         while (v_it != NULL) {
             struct Vertex *v = v_it->value;
-            fprintf(stdout, "%d ", v->id);
+            fprintf(stdout, "%d ", dag_v_get_id(v));
 
             v_it = list_next(v_it);
         }
@@ -225,9 +225,7 @@ void *get_int(void *a_v) {
 }
 
 void test_longest_path(void) {
-    struct Dag *d = dag_create();
-    d->add = add_ints;
-    d->comp = int_compare;
+    struct Dag *d = dag_create(add_ints, int_compare);
 
 
     // all paths from A to C
@@ -265,9 +263,7 @@ void test_longest_path(void) {
 }
 
 void test_longest_path_large(void) {
-    struct Dag *d = dag_create();
-    d->add = add_ints;
-    d->comp = int_compare;
+    struct Dag *d = dag_create(add_ints, int_compare);
 
     int vw[] = {1, 2, 2, 6, 5, 15, 20, 25};
     struct Vertex *A = dag_add_vertex(d, &vw[0]);
@@ -306,7 +302,7 @@ void test_longest_path_large(void) {
 }
 
 void test_small_topological_ordering(void) {
-     struct Dag *d = dag_create();
+     struct Dag *d = dag_create(NULL, NULL);
 
     int w1 = 1, w2 = 2, w3 = 3, w4 = 4;
     struct Vertex *A = dag_add_vertex(d, &w1);
@@ -325,7 +321,7 @@ void test_small_topological_ordering(void) {
     fprintf(stdout, "Order: ");
     while (it != NULL) {
         struct Vertex *v = it->value;
-        fprintf(stdout, "%d ", v->id);
+        fprintf(stdout, "%d ", dag_v_get_id(v));
 
         it = list_next(it);
     }   
@@ -338,9 +334,7 @@ void test_small_topological_ordering(void) {
 
 // Same graph as test_longest_path_large
 void test_topological_ordering_large(void) {
-    struct Dag *d = dag_create();
-    d->add = add_ints;
-    d->comp = int_compare;
+    struct Dag *d = dag_create(add_ints, int_compare);
 
     int vw[] = {1, 2, 2, 6, 5, 15, 20, 25};
     struct Vertex *A = dag_add_vertex(d, &vw[0]);
@@ -369,7 +363,7 @@ void test_topological_ordering_large(void) {
     fprintf(stdout, "Ordererd graph: ");
     while (it != NULL) {
         struct Vertex *v = it->value;
-        fprintf(stdout, "%d ", v->id);
+        fprintf(stdout, "%d ", dag_v_get_id(v));
 
         it = list_next(it);
     }   
