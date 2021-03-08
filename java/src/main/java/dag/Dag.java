@@ -1,6 +1,5 @@
 package dag;
 
-import alt.WeightMethods_alt;
 import exceptions.CyclicGraphException;
 
 import java.util.*;
