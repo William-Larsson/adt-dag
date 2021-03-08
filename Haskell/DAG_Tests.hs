@@ -3,17 +3,16 @@
 -- A set of tests to ensure that the DAG implementations 
 -- is working as intended. 
 module DAG_Tests where
-    import DAG ( 
-        Weight (..),
-        VertexID,
-        Edge,
+    import DAG( 
         addVertex,
         initGraph,
         Graph(..),
+        Weight(compare, add),
         addEdge,
         topologicalOrdering,
         weightOfLongestPath,
-        weightOfShortestPath)
+        weightOfShortestPath,
+        getAllPaths ) 
     import Data.Maybe ( isJust, isNothing )
 
 
@@ -97,13 +96,18 @@ module DAG_Tests where
 
     topologicalOrdTest    = topologicalOrdering g
     noTopologicalOrdTest  = topologicalOrdering gWithCycle
+
+    -- Tests for getting all paths between two vertices.
+    pathsBetween6And8Test = getAllPaths (addEdge g (6,8,1)) 6 8
+    pathsBetween6And5Test = getAllPaths (addEdge g (6,8,1)) 6 5
+    pathsBetweenSameVertexTest = getAllPaths g 6 6
     
     -- Tests for asserting proper longest/shortest path functionality
-    longestOfPathIntTest   = weightOfLongestPath (addEdge g (6,8,1)) 6 5 id id 
+    longestOfPathIntTest   = weightOfLongestPath (addEdge g (6,8,1)) 6 8 id id 
     shortestOfPathIntTest  = weightOfShortestPath (addEdge g (6,8,1)) 6 8 id id 
     longestOfPathCharTest  = weightOfLongestPath gc 6 8 id id 
     shortestOfPathCharTest = weightOfShortestPath gc 6 8 id id 
-    noPathExistsCharTest   = weightOfShortestPath gc 6 5 id id 
+    noPathNoWeightCharTest = weightOfShortestPath gc 6 5 id id 
 
     -- Tests for asserting Weight type class addition
     addIntTest :: Int

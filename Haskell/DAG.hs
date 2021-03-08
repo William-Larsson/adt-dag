@@ -12,6 +12,9 @@ module DAG (
     G.initGraph,
     G.addVertex,
     addEdge,
+    removeEdge,
+    removeEdges,
+    getAllPaths,
     topologicalOrdering,
     weightOfLongestPath,
     weightOfShortestPath
@@ -33,11 +36,10 @@ module DAG (
         | isJust topOrd   = newGraph
         | otherwise       = error hasCycle
         where
-            (startExists, endExists) = 
-                foldl 
-                    (\(srt, end) (idv,_) -> 
-                        (srt || idv == idStart, end || idv == idEnd)) 
-                    (False, False) vs
+            (startExists, endExists) = foldl 
+                (\(srt, end) (idv,_) -> 
+                    (srt || idv == idStart, end || idv == idEnd)) 
+                (False, False) vs
             newGraph = G.Graph vs (ed:es)
             topOrd   = topologicalOrdering newGraph 
             noStart  = "Cannot add edge - start vertex does not exist."
@@ -117,16 +119,15 @@ module DAG (
     -- Input function f is used to interpret the weight of a vertex.
     -- Input function g is used to interpret the weight on an edge. 
     -- Input function comp used to get longest/shortest path. 
-    -- Uses getAdjacentVertices, filterEdgesFromVertex, getAllPaths
-    -- getPathInfo, calcPathWeight & W.compare as helper functions. 
+    -- Uses getAllPaths, getPathInfo, calcPathWeight & W.compare 
+    -- as helper functions. 
     weightOfPathComp :: W.Weight w => 
         G.Graph w -> Integer -> Integer -> (w -> w) -> (w -> w) -> 
         ((Maybe w -> Maybe w -> Ordering) -> [Maybe w] -> Maybe w) 
         -> Maybe w
     weightOfPathComp graph@(G.Graph _ es) start end f g compFunc = maxWeight
         where 
-            startAdj    = getAdjacentVertices $ filterEdgesFromVertex start es  
-            allPaths    = getAllPaths graph start end startAdj [start]
+            allPaths    = getAllPaths graph start end
             pathsInfo   = map (getPathInfo graph) allPaths
             pathWeights = map (\l -> calcPathWeight l f g) pathsInfo
             maxWeight
@@ -155,24 +156,32 @@ module DAG (
     -- Works by finding all paths leading out from the starting vertex 
     -- and filters out every path that does not end in ending vertex.
     -- Uses getAdjacentVertices and filterEdgesFromVertex as 
-    -- helper functions. 
-    -- Input: Graph , start, end, adjacent vertices, current path
-    getAllPaths :: G.Graph w -> G.VertexID -> G.VertexID -> [G.VertexID] ->
-        [G.VertexID] -> [[G.VertexID]]
-    getAllPaths _ _ end [] path = filterEndingVertices end [path]
+    -- helper functions.
+    getAllPaths :: G.Graph w -> G.VertexID -> G.VertexID -> [[G.VertexID]] 
+    getAllPaths g@(G.Graph _ es) start end = let
 
-    getAllPaths g@(G.Graph vs es) start end [adj] path 
-        | start == end = [path]    
-        | otherwise    =
-        getAllPaths g adj end 
-            (getAdjacentVertices $ filterEdgesFromVertex adj es) (path ++ [adj]) 
+        -- find the first adjacent vertices to kick off the getAll recursion.
+        startAdj = getAdjacentVertices $ filterEdgesFromVertex start es
 
-    getAllPaths g@(G.Graph vs es) start end (adj:as) path 
-        | start == end = [path] 
-        | otherwise    =
-        getAllPaths g adj end 
-            (getAdjacentVertices $ filterEdgesFromVertex adj es) (path ++ [adj]) 
-            ++ getAllPaths g start end as path 
+        getAll :: G.Graph w -> G.VertexID -> G.VertexID -> [G.VertexID] ->
+            [G.VertexID] -> [[G.VertexID]]
+        getAll _ _ end [] path = filterEndingVertices end [path]
+
+        getAll g@(G.Graph vs es) start end [adj] path 
+            | start == end = [path]    
+            | otherwise    =
+            getAll g adj end 
+                (getAdjacentVertices $ filterEdgesFromVertex adj es) (path ++ [adj]) 
+
+        getAll g@(G.Graph vs es) start end (adj:as) path 
+            | start == end = [path] 
+            | otherwise    =
+            getAll g adj end 
+                (getAdjacentVertices $ filterEdgesFromVertex adj es) (path ++ [adj]) 
+                ++ getAll g start end as path 
+
+        in getAll g start end startAdj [start]
+
 
     -- Function: getPathInfo 
     --
