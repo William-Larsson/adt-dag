@@ -119,8 +119,8 @@ module DAG (
     -- Input function comp used to get longest/shortest path. 
     -- Uses getAdjacentVertices, filterEdgesFromVertex, getAllPaths
     -- getPathInfo, calcPathWeight & W.compare as helper functions. 
-    weightOfPathComp :: W.Weight w => G.Graph w -> Integer -> Integer 
-        -> (w -> w) -> (w -> w) -> 
+    weightOfPathComp :: W.Weight w => 
+        G.Graph w -> Integer -> Integer -> (w -> w) -> (w -> w) -> 
         ((Maybe w -> Maybe w -> Ordering) -> [Maybe w] -> Maybe w) 
         -> Maybe w
     weightOfPathComp graph@(G.Graph _ es) start end f g compFunc = maxWeight

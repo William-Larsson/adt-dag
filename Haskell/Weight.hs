@@ -7,7 +7,6 @@
 module Weight ( Weight (..) ) where
     
     import Data.Char ( ord, chr )
-    import Data.List ( sort ) 
     import Data.Maybe ( fromJust ) 
 
     -- Type class: Weight
