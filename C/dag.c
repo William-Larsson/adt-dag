@@ -27,6 +27,7 @@ struct Dag {
 };
 
 static struct list *dag_get_edges_from(struct Dag *d, struct Vertex *a);
+static struct Dag *dag_clone(struct Dag *d);
 
 /**
  * Creates a new dag.

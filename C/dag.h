@@ -22,8 +22,11 @@ struct Vertex;
 struct Edge;
 struct Dag;
 
+/**
+ * Creates a new dag.
+ * return - the new dag on success; null on error.
+ */
 struct Dag *dag_create(add_weight_func add_func, weight_comp_func comp_func);
-struct Dag *dag_clone(struct Dag *d);
 
 /**
  * Adds a new vertex to the graph. The Vertex will have weight w
@@ -97,7 +100,12 @@ void *dag_weight_of_longest_path(struct Dag *d,
                                 struct Vertex *a, struct Vertex *b,
                                 get_weight_func f, get_weight_func g);
 
-
+/**
+ * Performs a topological ordering, using Kahn's algorithm.
+ * dag - graph containing the vertices to sort.
+ * return - A list containing the sorted elements. This list must be 
+ *          freed by calling dag_destroy_path() to avoid memory leaks.
+ */
 struct list *dag_topological_ordering(struct Dag *d);
 
 /**
