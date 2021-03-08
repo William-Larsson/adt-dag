@@ -99,12 +99,11 @@ module DAG_Tests where
     noTopologicalOrdTest  = topologicalOrdering gWithCycle
     
     -- Tests for asserting proper longest/shortest path functionality
-    longestOfPathIntTest   = weightOfLongestPath g 6 8 id id 
-    shortestOfPathIntTest  = weightOfShortestPath g 6 8 id id 
-    longestOfPathIntTest2  = weightOfLongestPath (addEdge g (6,8,1)) 6 8 id id 
-    shortestOfPathIntTest2 = weightOfShortestPath (addEdge g (6,8,1)) 6 8 id id 
+    longestOfPathIntTest   = weightOfLongestPath (addEdge g (6,8,1)) 6 5 id id 
+    shortestOfPathIntTest  = weightOfShortestPath (addEdge g (6,8,1)) 6 8 id id 
     longestOfPathCharTest  = weightOfLongestPath gc 6 8 id id 
     shortestOfPathCharTest = weightOfShortestPath gc 6 8 id id 
+    noPathExistsCharTest   = weightOfShortestPath gc 6 5 id id 
 
     -- Tests for asserting Weight type class addition
     addIntTest :: Int
@@ -123,7 +122,7 @@ module DAG_Tests where
     addCharTest    = DAG.add '0' '1'
 
     addStringTest :: String
-    addStringTest    = DAG.add "My" "String"
+    addStringTest    = DAG.add "String" "Other string"
     
     -- Tests for asserting Weight type class comparison
     compareIntTest :: Ordering
